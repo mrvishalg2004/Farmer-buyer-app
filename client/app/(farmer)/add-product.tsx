@@ -3,7 +3,9 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert,
 import axios from 'axios';
 import { useRouter } from 'expo-router';
 
-const API_URL = 'http://192.168.1.4:5001';
+import { API_URL } from '@/constants/config';
+
+
 
 export default function AddProduct() {
     const [name, setName] = useState('');

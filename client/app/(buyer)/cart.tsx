@@ -7,7 +7,9 @@ import { Ionicons } from '@expo/vector-icons';
 import SuccessModal from '../../components/SuccessModal';
 import { useRouter } from 'expo-router';
 
-const API_URL = 'http://192.168.1.4:5001';
+import { API_URL } from '@/constants/config';
+
+
 
 // Note: Ensure Razorpay SDK is installed if going native, 
 // OR use a WebView / simple API call if in Expo Go without native code.

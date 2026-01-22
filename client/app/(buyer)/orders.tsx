@@ -4,7 +4,9 @@ import axios from 'axios';
 import { useFocusEffect } from 'expo-router';
 
 // Make sure API_URL matches other files
-const API_URL = 'http://192.168.1.4:5001';
+import { API_URL } from '@/constants/config';
+
+
 
 interface OrderItem {
     name: string;
@@ -28,7 +30,8 @@ export default function OrdersScreen() {
     const fetchOrders = async () => {
         try {
             const res = await axios.get(`${API_URL}/orders`);
-            setOrders(res.data);
+            setOrders(res.data as Order[]);
+
         } catch (error) {
             console.error(error);
         } finally {

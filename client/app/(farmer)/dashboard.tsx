@@ -3,7 +3,9 @@ import { View, Text, FlatList, StyleSheet, ActivityIndicator, TouchableOpacity, 
 import axios from 'axios';
 import { useFocusEffect } from 'expo-router';
 
-const API_URL = 'http://192.168.1.4:5001';
+import { API_URL } from '@/constants/config';
+
+
 
 interface Product {
     _id: string;

@@ -4,7 +4,9 @@ import { Link, useRouter } from 'expo-router';
 import { useAuth } from '../../context/AuthContext';
 import axios from 'axios';
 
-const API_URL = 'http://192.168.1.4:5001';
+import { API_URL } from '@/constants/config';
+
+
 
 export default function Register() {
     const [name, setName] = useState('');

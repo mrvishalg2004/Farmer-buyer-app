@@ -3,7 +3,9 @@ import axios from 'axios';
 import { useRouter, useSegments } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 
-const API_URL = 'http://192.168.1.4:5001'; // Make sure this matches your server URL. For Android Emulator use 10.0.2.2
+import { API_URL } from '@/constants/config';
+
+
 
 interface User {
     id: string;
