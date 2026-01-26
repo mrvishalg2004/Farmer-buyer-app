@@ -22,6 +22,11 @@ const UserSchema = new mongoose.Schema({
     createdAt: {
         type: Date,
         default: Date.now
+    },
+    location: {
+        latitude: Number,
+        longitude: Number,
+        address: String
     }
 });
 

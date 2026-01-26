@@ -19,6 +19,7 @@ app.use('/auth', require('./routes/auth'));
 app.use('/products', require('./routes/products'));
 app.use('/cart', require('./routes/cart'));
 app.use('/orders', require('./routes/orders'));
+app.use('/bids', require('./routes/bids'));
 
 // Database Connection
 mongoose.connect(process.env.MONGO_URI)

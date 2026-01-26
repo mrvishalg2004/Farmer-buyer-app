@@ -30,6 +30,13 @@ export default function FarmerLayout() {
                 }}
             />
             <Tabs.Screen
+                name="bids"
+                options={{
+                    title: 'Auctions',
+                    tabBarIcon: ({ color }) => <Ionicons name="pricetag" size={24} color={color} />,
+                }}
+            />
+            <Tabs.Screen
                 name="orders"
                 options={{
                     title: 'Orders',

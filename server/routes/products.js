@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/auth');
 const Product = require('../models/Product');
+const Order = require('../models/Order');
 
 // @route   POST /products
 // @desc    Add a new product
@@ -11,7 +12,7 @@ router.post('/', auth, async (req, res) => {
         return res.status(403).json({ message: 'Access denied. Farmers only.' });
     }
 
-    const { name, category, price, unit, quantity, image, description } = req.body;
+    const { name, category, price, unit, quantity, image, description, isAuction, basePrice, auctionEndTime } = req.body;
 
     if (!name || !category || !price || !unit || !quantity) {
         return res.status(400).json({ message: 'Please enter all required fields' });
@@ -26,7 +27,12 @@ router.post('/', auth, async (req, res) => {
             unit,
             quantity,
             image,
-            description
+            image,
+            description,
+            isAuction,
+            basePrice,
+            auctionEndTime,
+            highestBid: isAuction ? 0 : undefined
         });
 
         const product = await newProduct.save();
@@ -131,6 +137,140 @@ router.get('/', async (req, res) => {
     try {
         const products = await Product.find().sort({ createdAt: -1 });
         res.json(products);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
+module.exports = router;
+
+// @route   POST /products/:id/bid
+// @desc    Place a bid on a product
+// @access  Private (Buyer)
+router.post('/:id/bid', auth, async (req, res) => {
+    try {
+        const product = await Product.findById(req.params.id);
+        if (!product) return res.status(404).json({ message: 'Product not found' });
+
+        if (!product.isAuction) {
+            return res.status(400).json({ message: 'This product is not for auction' });
+        }
+
+        if (new Date() > new Date(product.auctionEndTime)) {
+            return res.status(400).json({ message: 'Auction has ended' });
+        }
+
+        const { amount } = req.body;
+        if (!amount || amount <= product.highestBid || amount <= product.basePrice) {
+            return res.status(400).json({ message: 'Bid must be higher than current highest bid and base price' });
+        }
+
+        const newBid = {
+            user: req.user.id,
+            amount,
+            time: Date.now()
+        };
+
+        product.bids.push(newBid);
+        product.highestBid = amount;
+        product.highestBidderId = req.user.id; // Track the highest bidder
+
+        await product.save();
+        res.json(product);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
+// @route   POST /products/:id/accept-bid
+// @desc    Accept a bid and convert to order
+// @access  Private (Farmer only)
+router.post('/:id/accept-bid', auth, async (req, res) => {
+    try {
+        const product = await Product.findById(req.params.id);
+        if (!product) return res.status(404).json({ message: 'Product not found' });
+
+        if (product.farmer.toString() !== req.user.id) {
+            return res.status(401).json({ message: 'Not authorized' });
+        }
+
+        const { bidId } = req.body;
+        const bid = product.bids.id(bidId);
+
+        if (!bid) {
+            return res.status(404).json({ message: 'Bid not found' });
+        }
+
+        // Create Order
+        const newOrder = new Order({
+            user: bid.user,
+            items: [{
+                product: product._id,
+                name: product.name,
+                price: bid.amount,
+                quantity: product.quantity // Assuming selling all quantity in auction
+            }],
+            totalAmount: bid.amount, // Total amount is the bid amount
+            paymentId: 'AUCTION_' + Date.now(), // Placeholder
+            status: 'pending'
+        });
+
+        await newOrder.save();
+
+        // Optional: Mark product as sold or decrease quantity
+        // product.quantity = 0;
+        // await product.save();
+
+        res.json({ message: 'Bid accepted, order created', order: newOrder });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+// @route   POST /products/:id/auction
+// @desc    Enable auction mode for a product (Feature 1 Strict)
+// @access  Private (Farmer only)
+router.post('/:id/auction', auth, async (req, res) => {
+    try {
+        const product = await Product.findById(req.params.id);
+        if (!product) return res.status(404).json({ message: 'Product not found' });
+
+        if (product.farmer.toString() !== req.user.id) {
+            return res.status(403).json({ message: 'Access denied. Only the owner can start an auction.' });
+        }
+
+        if (product.auctionStatus === 'CLOSED' || product.auctionStatus === 'SOLD') {
+            return res.status(400).json({ message: 'This auction is already closed or sold.' });
+        }
+
+        const { basePrice, minBidIncrement, auctionStartTime, auctionEndTime } = req.body;
+
+        if (!basePrice || !auctionStartTime || !auctionEndTime) {
+            return res.status(400).json({ message: 'Please provide basePrice, auctionStartTime, and auctionEndTime.' });
+        }
+
+        const start = new Date(auctionStartTime);
+        const end = new Date(auctionEndTime);
+
+        if (end <= start) {
+            return res.status(400).json({ message: 'Auction end time must be after start time.' });
+        }
+
+        product.isAuction = true;
+        product.basePrice = basePrice;
+        product.minBidIncrement = minBidIncrement || 0;
+        product.auctionStartTime = start;
+        product.auctionEndTime = end;
+        product.auctionStatus = 'OPEN';
+
+        // Reset highest bid if restarting/configuring
+        // product.highestBid = 0; 
+        // product.highestBidderId = undefined;
+
+        await product.save();
+        res.json(product);
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server Error');

@@ -36,6 +36,51 @@ const ProductSchema = new mongoose.Schema({
     createdAt: {
         type: Date,
         default: Date.now
+    },
+    isAuction: {
+        type: Boolean,
+        default: false
+    },
+    basePrice: {
+        type: Number,
+        default: 0
+    },
+    auctionEndTime: {
+        type: Date
+    },
+    auctionStartTime: {
+        type: Date
+    },
+    minBidIncrement: {
+        type: Number,
+        default: 0
+    },
+    highestBidderId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    },
+    auctionStatus: {
+        type: String,
+        enum: ['OPEN', 'CLOSED', 'SOLD'],
+        default: 'OPEN'
+    },
+    bids: [{
+        user: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        },
+        amount: {
+            type: Number,
+            required: true
+        },
+        time: {
+            type: Date,
+            default: Date.now
+        }
+    }],
+    highestBid: {
+        type: Number,
+        default: 0
     }
 });
 

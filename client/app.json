@@ -1,18 +1,19 @@
 {
   "expo": {
-    "name": "client",
-    "slug": "client",
+    "name": "KhetKart",
+    "slug": "khetkart",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "client",
+    "scheme": "khetkart",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.khetkart.app"
     },
     "android": {
-      "package": "com.farmermarket.app",
+      "package": "com.khetkart.app",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",

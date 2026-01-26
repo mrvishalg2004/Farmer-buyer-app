@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, FlatList, StyleSheet, ActivityIndicator, Image, TouchableOpacity, Alert } from 'react-native';
 import axios from 'axios';
-import { useFocusEffect } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
 import { API_URL } from '@/constants/config';
@@ -16,11 +16,16 @@ interface Product {
     unit: string;
     quantity: number;
     image?: string;
+    isAuction?: boolean;
+    basePrice?: number;
+    highestBid?: number;
+    auctionEndTime?: string;
 }
 
 export default function BuyerHome() {
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
+    const router = useRouter();
 
     const fetchProducts = async () => {
         try {
@@ -56,20 +61,39 @@ export default function BuyerHome() {
             />
             <View style={styles.info}>
                 <Text style={styles.name}>{item.name}</Text>
-                <Text style={styles.details}>{item.category} • ₹{item.price}/{item.unit}</Text>
-                {item.quantity > 0 ? (
-                    <Text style={styles.stock}>In Stock ({item.quantity})</Text>
-                ) : (
-                    <Text style={styles.outOfStock}>Out of Stock</Text>
+                <Text style={styles.details}>{item.category} • {item.isAuction ? `Base: ₹${item.basePrice}/${item.unit}` : `₹${item.price}/${item.unit}`}</Text>
+
+                {item.isAuction && (
+                    <Text style={styles.auctionText}>
+                        Current Bid: <Text style={styles.price}>₹{item.highestBid || item.basePrice}</Text>
+                    </Text>
+                )}
+
+                {!item.isAuction && (
+                    item.quantity > 0 ? (
+                        <Text style={styles.stock}>In Stock ({item.quantity})</Text>
+                    ) : (
+                        <Text style={styles.outOfStock}>Out of Stock</Text>
+                    )
                 )}
             </View>
-            <TouchableOpacity
-                style={[styles.addBtn, item.quantity === 0 && styles.disabledBtn]}
-                onPress={() => addToCart(item._id)}
-                disabled={item.quantity === 0}
-            >
-                <Ionicons name="add" size={24} color="#fff" />
-            </TouchableOpacity>
+
+            {item.isAuction ? (
+                <TouchableOpacity
+                    style={styles.bidBtn}
+                    onPress={() => router.push(`/product/${item._id}` as any)}
+                >
+                    <Text style={styles.bidBtnText}>Bid</Text>
+                </TouchableOpacity>
+            ) : (
+                <TouchableOpacity
+                    style={[styles.addBtn, item.quantity === 0 && styles.disabledBtn]}
+                    onPress={() => addToCart(item._id)}
+                    disabled={item.quantity === 0}
+                >
+                    <Ionicons name="add" size={24} color="#fff" />
+                </TouchableOpacity>
+            )}
         </View>
     );
 
@@ -165,6 +189,23 @@ const styles = StyleSheet.create({
     },
     disabledBtn: {
         backgroundColor: '#ccc'
+    },
+    bidBtn: {
+        backgroundColor: '#F57C00',
+        paddingVertical: 8,
+        paddingHorizontal: 16,
+        borderRadius: 20,
+    },
+    bidBtnText: {
+        color: '#fff',
+        fontWeight: 'bold',
+        fontSize: 14,
+    },
+    auctionText: {
+        fontSize: 12,
+        color: '#F57C00',
+        marginBottom: 4,
+        fontWeight: 'bold',
     },
     empty: {
         textAlign: 'center',
