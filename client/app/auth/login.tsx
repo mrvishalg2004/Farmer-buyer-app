@@ -13,6 +13,7 @@ import { API_URL } from '@/constants/config';
 export default function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [role, setRole] = useState<'farmer' | 'buyer'>('buyer');
     const [loading, setLoading] = useState(false);
     const { login } = useAuth();
     const router = useRouter();
@@ -29,6 +30,16 @@ export default function Login() {
             const res = await axios.post(`${API_URL}/auth/login`, { email, password }, { timeout: 5000 });
             console.log('Login response received');
             const data = res.data as { token: string; user: any };
+
+            // Verify role matches
+            if (data.user.role !== role) {
+                Alert.alert(
+                    'Login Failed',
+                    `This account is registered as a '${data.user.role}'. Please switch to that role to login.`
+                );
+                return;
+            }
+
             await login(data.token, data.user);
             console.log('Context login complete');
         } catch (error: any) {
@@ -56,6 +67,23 @@ export default function Login() {
 
                     <Text style={styles.title}>KhetKart</Text>
                     <Text style={styles.subtitle}>Fresh from farm to your home</Text>
+
+                    <View style={styles.roleContainer}>
+                        <TouchableOpacity
+                            style={[styles.roleButton, role === 'buyer' && styles.roleButtonActive]}
+                            onPress={() => setRole('buyer')}
+                        >
+                            <Ionicons name="cart-outline" size={20} color={role === 'buyer' ? '#fff' : '#666'} />
+                            <Text style={[styles.roleText, role === 'buyer' && styles.roleTextActive]}>Buyer</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={[styles.roleButton, role === 'farmer' && styles.roleButtonActive]}
+                            onPress={() => setRole('farmer')}
+                        >
+                            <Ionicons name="leaf-outline" size={20} color={role === 'farmer' ? '#fff' : '#666'} />
+                            <Text style={[styles.roleText, role === 'farmer' && styles.roleTextActive]}>Farmer</Text>
+                        </TouchableOpacity>
+                    </View>
 
                     <View style={styles.inputContainer}>
                         <View style={styles.inputWrapper}>
@@ -148,7 +176,41 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: '#666',
         textAlign: 'center',
-        marginBottom: 30,
+        marginBottom: 24,
+    },
+    roleContainer: {
+        flexDirection: 'row',
+        marginBottom: 20,
+        backgroundColor: '#F1F8E9',
+        borderRadius: 12,
+        padding: 4,
+    },
+    roleButton: {
+        flex: 1,
+        paddingVertical: 12,
+        paddingHorizontal: 10,
+        alignItems: 'center',
+        borderRadius: 10,
+        flexDirection: 'row',
+        justifyContent: 'center',
+    },
+    roleButtonActive: {
+        backgroundColor: '#2E7D32',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
+        elevation: 2,
+    },
+    roleText: {
+        color: '#666',
+        fontWeight: '600',
+        marginLeft: 6,
+        fontSize: 14,
+    },
+    roleTextActive: {
+        color: '#fff',
+        fontWeight: 'bold',
     },
     inputContainer: {
         marginBottom: 20,
