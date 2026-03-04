@@ -43,16 +43,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }, []);
 
     useEffect(() => {
+        console.log('AuthContext: User state changed ->', user ? user.role : 'No user');
+        console.log('AuthContext: Loading state ->', isLoading);
         if (isLoading) return;
 
         const inAuthGroup = segments[0] === 'auth';
+        console.log('AuthContext: Segments ->', segments, 'InAuthGroup ->', inAuthGroup);
 
         if (!user && !inAuthGroup) {
+            console.log('AuthContext: Redirecting to /auth/login');
             // Redirect to login if not authenticated
             router.replace('/auth/login');
         } else if (user) {
             // Redirect based on role if at root or in auth group
             if (inAuthGroup || (segments as string[]).length === 0) {
+                console.log(`AuthContext: Redirecting to role dashboard: ${user.role}`);
                 if (user.role === 'farmer') {
                     router.replace('/(farmer)/dashboard');
                 } else {
@@ -63,9 +68,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }, [user, isLoading, segments]);
 
     const checkLogin = async () => {
+        console.log('AuthContext: checkLogin started');
         try {
             const storedToken = await SecureStore.getItemAsync('token');
             const userData = await SecureStore.getItemAsync('user');
+            console.log('AuthContext: storedToken present?', !!storedToken, 'userData present?', !!userData);
 
             if (storedToken && userData) {
                 setToken(storedToken);
@@ -73,8 +80,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
             }
         } catch (e) {
-            console.error(e);
+            console.error('AuthContext: Error checking login', e);
         } finally {
+            console.log('AuthContext: checkLogin completed');
             setIsLoading(false);
         }
     };

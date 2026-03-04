@@ -12,30 +12,46 @@ function AppContent() {
 
   useEffect(() => {
     (async () => {
+      console.log('AppContent mounted, checking user:', user ? user.email : 'No user');
       if (!user || !token) return;
 
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        console.log('Permission to access location was denied');
-        return;
-      }
-
-      let location = await Location.getCurrentPositionAsync({});
-
-      // Send to backend
       try {
-        await axios.put(
-          `${API_URL}/auth/location`,
-          {
-            latitude: location.coords.latitude,
-            longitude: location.coords.longitude,
-            // address: ... (optional reverse geocode if needed, but strict requirement didn't mandate it)
-          },
-          { headers: { 'Authorization': `Bearer ${token}` } }
-        );
-        console.log('Location synced');
+        let { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== 'granted') {
+          console.log('Permission to access location was denied');
+          return;
+        }
+
+        console.log('Fetching location...');
+        let location = null;
+        try {
+          // Try to get current position with a timeout
+          location = await Promise.race([
+            Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced }),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Location timeout')), 5000))
+          ]) as Location.LocationObject;
+        } catch (e) {
+          console.log('Current position unavailable, trying last known position...');
+          location = await Location.getLastKnownPositionAsync({});
+        }
+
+        if (location) {
+          console.log('Location fetched:', location.coords.latitude);
+          // Send to backend
+          await axios.put(
+            `${API_URL}/auth/location`,
+            {
+              latitude: location.coords.latitude,
+              longitude: location.coords.longitude,
+            },
+            { headers: { 'Authorization': `Bearer ${token}` } }
+          );
+          console.log('Location synced');
+        } else {
+          console.log('Could not determine location, skipping sync');
+        }
       } catch (error) {
-        console.error('Failed to sync location', error);
+        console.warn('Location sync skipped:', error instanceof Error ? error.message : 'Unknown error');
       }
     })();
   }, [user, token]);

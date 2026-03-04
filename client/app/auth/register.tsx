@@ -1,6 +1,18 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import {
+    View,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    StyleSheet,
+    Alert,
+    ActivityIndicator,
+    ImageBackground,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    Dimensions
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Link, useRouter } from 'expo-router';
 import { useAuth } from '../../context/AuthContext';
@@ -8,7 +20,7 @@ import axios from 'axios';
 
 import { API_URL } from '@/constants/config';
 
-
+const { width, height } = Dimensions.get('window');
 
 export default function Register() {
     const [name, setName] = useState('');
@@ -39,221 +51,259 @@ export default function Register() {
     };
 
     return (
-        <View style={styles.container}>
-            <LinearGradient
-                colors={['#E8F5E9', '#C8E6C9', '#A5D6A7']}
-                style={styles.gradient}
+        <ImageBackground
+            source={require('../../assets/images/auth-bg.png')}
+            style={styles.backgroundImage}
+            resizeMode="cover"
+        >
+            <KeyboardAvoidingView
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                style={styles.overlay}
             >
-                <View style={styles.card}>
-                    <Text style={styles.title}>Join KhetKart</Text>
-                    <Text style={styles.subtitle}>Start your agricultural journey</Text>
-
-                    <View style={styles.roleContainer}>
-                        <TouchableOpacity
-                            style={[styles.roleButton, role === 'buyer' && styles.roleButtonActive]}
-                            onPress={() => setRole('buyer')}
-                        >
-                            <Ionicons name="cart-outline" size={20} color={role === 'buyer' ? '#fff' : '#666'} />
-                            <Text style={[styles.roleText, role === 'buyer' && styles.roleTextActive]}>Buyer</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={[styles.roleButton, role === 'farmer' && styles.roleButtonActive]}
-                            onPress={() => setRole('farmer')}
-                        >
-                            <Ionicons name="leaf-outline" size={20} color={role === 'farmer' ? '#fff' : '#666'} />
-                            <Text style={[styles.roleText, role === 'farmer' && styles.roleTextActive]}>Farmer</Text>
-                        </TouchableOpacity>
-                    </View>
-
-                    <View style={styles.inputContainer}>
-                        <View style={styles.inputWrapper}>
-                            <Ionicons name="person-outline" size={20} color="#666" style={styles.inputIcon} />
-                            <TextInput
-                                style={styles.input}
-                                placeholder="Full Name"
-                                value={name}
-                                onChangeText={setName}
-                                placeholderTextColor="#999"
-                            />
+                <ScrollView
+                    contentContainerStyle={styles.scrollContent}
+                    showsVerticalScrollIndicator={false}
+                >
+                    <View style={styles.card}>
+                        <View style={styles.header}>
+                            <View style={styles.logoCircle}>
+                                <Ionicons name="leaf" size={40} color="#2E7D32" />
+                            </View>
+                            <Text style={styles.title}>KhetKart</Text>
+                            <Text style={styles.subtitle}>Empowering Agriculture, Connecting Lives</Text>
                         </View>
-                        <View style={styles.inputWrapper}>
-                            <Ionicons name="mail-outline" size={20} color="#666" style={styles.inputIcon} />
-                            <TextInput
-                                style={styles.input}
-                                placeholder="Email Address"
-                                value={email}
-                                onChangeText={setEmail}
-                                autoCapitalize="none"
-                                keyboardType="email-address"
-                                placeholderTextColor="#999"
-                            />
-                        </View>
-                        <View style={styles.inputWrapper}>
-                            <Ionicons name="lock-closed-outline" size={20} color="#666" style={styles.inputIcon} />
-                            <TextInput
-                                style={styles.input}
-                                placeholder="Password"
-                                value={password}
-                                onChangeText={setPassword}
-                                secureTextEntry
-                                placeholderTextColor="#999"
-                            />
-                        </View>
-                    </View>
 
-                    <TouchableOpacity
-                        style={[styles.button, loading && styles.buttonDisabled]}
-                        onPress={handleRegister}
-                        disabled={loading}
-                    >
-                        {loading ? (
-                            <ActivityIndicator color="#fff" />
-                        ) : (
-                            <Text style={styles.buttonText}>Create Account</Text>
-                        )}
-                    </TouchableOpacity>
-
-                    <View style={styles.footer}>
-                        <Text style={styles.footerText}>Already have an account? </Text>
-                        <Link href="/auth/login" asChild>
-                            <TouchableOpacity>
-                                <Text style={styles.link}>Login</Text>
+                        <Text style={styles.label}>Select Your Role</Text>
+                        <View style={styles.roleContainer}>
+                            <TouchableOpacity
+                                style={[styles.roleButton, role === 'buyer' && styles.roleButtonActive]}
+                                onPress={() => setRole('buyer')}
+                            >
+                                <Ionicons name="cart" size={22} color={role === 'buyer' ? '#fff' : '#2E7D32'} />
+                                <Text style={[styles.roleText, role === 'buyer' && styles.roleTextActive]}>Buyer</Text>
                             </TouchableOpacity>
-                        </Link>
+                            <TouchableOpacity
+                                style={[styles.roleButton, role === 'farmer' && styles.roleButtonActive]}
+                                onPress={() => setRole('farmer')}
+                            >
+                                <Ionicons name="business" size={22} color={role === 'farmer' ? '#fff' : '#2E7D32'} />
+                                <Text style={[styles.roleText, role === 'farmer' && styles.roleTextActive]}>Farmer</Text>
+                            </TouchableOpacity>
+                        </View>
+
+                        <View style={styles.inputSection}>
+                            <View style={styles.inputWrapper}>
+                                <Ionicons name="person-outline" size={20} color="#4E342E" style={styles.inputIcon} />
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Full Name"
+                                    value={name}
+                                    onChangeText={setName}
+                                    placeholderTextColor="#795548"
+                                />
+                            </View>
+
+                            <View style={styles.inputWrapper}>
+                                <Ionicons name="mail-outline" size={20} color="#4E342E" style={styles.inputIcon} />
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Email Address"
+                                    value={email}
+                                    onChangeText={setEmail}
+                                    autoCapitalize="none"
+                                    keyboardType="email-address"
+                                    placeholderTextColor="#795548"
+                                />
+                            </View>
+
+                            <View style={styles.inputWrapper}>
+                                <Ionicons name="lock-closed-outline" size={20} color="#4E342E" style={styles.inputIcon} />
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Create Password"
+                                    value={password}
+                                    onChangeText={setPassword}
+                                    secureTextEntry
+                                    placeholderTextColor="#795548"
+                                />
+                            </View>
+                        </View>
+
+                        <TouchableOpacity
+                            style={[styles.button, loading && styles.buttonDisabled]}
+                            onPress={handleRegister}
+                            disabled={loading}
+                        >
+                            {loading ? (
+                                <ActivityIndicator color="#fff" />
+                            ) : (
+                                <Text style={styles.buttonText}>Get Started</Text>
+                            )}
+                        </TouchableOpacity>
+
+                        <View style={styles.footer}>
+                            <Text style={styles.footerText}>Already have an account? </Text>
+                            <Link href="/auth/login" asChild>
+                                <TouchableOpacity>
+                                    <Text style={styles.link}>Login Here</Text>
+                                </TouchableOpacity>
+                            </Link>
+                        </View>
                     </View>
-                </View>
-            </LinearGradient>
-        </View>
+                </ScrollView>
+            </KeyboardAvoidingView>
+        </ImageBackground>
     );
 }
 
 const styles = StyleSheet.create({
-    container: {
+    backgroundImage: {
         flex: 1,
-        backgroundColor: '#f8f9fa',
+        width: width,
+        height: height,
     },
-    gradient: {
+    overlay: {
         flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.3)',
+        justifyContent: 'center',
+    },
+    scrollContent: {
+        flexGrow: 1,
         justifyContent: 'center',
         padding: 20,
     },
     card: {
-        backgroundColor: 'rgba(255, 255, 255, 0.95)',
-        borderRadius: 20,
-        padding: 30,
+        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+        borderRadius: 30,
+        padding: 25,
+        width: '100%',
+        maxWidth: 450,
+        alignSelf: 'center',
         shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 4,
-        },
-        shadowOpacity: 0.1,
-        shadowRadius: 10,
-        elevation: 8,
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.3,
+        shadowRadius: 20,
+        elevation: 10,
+    },
+    header: {
+        alignItems: 'center',
+        marginBottom: 30,
+    },
+    logoCircle: {
+        width: 80,
+        height: 80,
+        borderRadius: 40,
+        backgroundColor: '#E8F5E9',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 15,
+        borderWidth: 2,
+        borderColor: '#2E7D32',
     },
     title: {
-        fontSize: 28,
+        fontSize: 32,
         fontWeight: 'bold',
         color: '#1B5E20',
-        textAlign: 'center',
-        marginBottom: 8,
+        letterSpacing: 1,
     },
     subtitle: {
         fontSize: 14,
-        color: '#666',
+        color: '#5D4037',
+        marginTop: 5,
         textAlign: 'center',
-        marginBottom: 24,
+    },
+    label: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#3E2723',
+        marginBottom: 12,
+        marginLeft: 5,
     },
     roleContainer: {
         flexDirection: 'row',
-        marginBottom: 20,
-        backgroundColor: '#F1F8E9',
-        borderRadius: 12,
-        padding: 4,
+        marginBottom: 25,
+        gap: 12,
     },
     roleButton: {
         flex: 1,
-        paddingVertical: 12,
-        paddingHorizontal: 10,
-        alignItems: 'center',
-        borderRadius: 10,
         flexDirection: 'row',
+        alignItems: 'center',
         justifyContent: 'center',
+        paddingVertical: 14,
+        borderRadius: 15,
+        backgroundColor: '#fff',
+        borderWidth: 2,
+        borderColor: '#2E7D32',
     },
     roleButtonActive: {
         backgroundColor: '#2E7D32',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 3,
-        elevation: 2,
     },
     roleText: {
-        color: '#666',
-        fontWeight: '600',
-        marginLeft: 6,
-        fontSize: 14,
+        fontSize: 15,
+        fontWeight: 'bold',
+        color: '#2E7D32',
+        marginLeft: 8,
     },
     roleTextActive: {
         color: '#fff',
-        fontWeight: 'bold',
     },
-    inputContainer: {
-        marginBottom: 20,
+    inputSection: {
+        marginBottom: 25,
     },
     inputWrapper: {
         flexDirection: 'row',
         alignItems: 'center',
+        backgroundColor: '#fff',
+        borderRadius: 15,
+        marginBottom: 15,
+        paddingHorizontal: 15,
+        height: 60,
         borderWidth: 1,
-        borderColor: '#E0E0E0',
-        borderRadius: 12,
-        marginBottom: 16,
-        backgroundColor: '#FAFAFA',
-        paddingHorizontal: 14,
-        height: 56,
+        borderColor: '#D7CCC8',
     },
     inputIcon: {
-        marginRight: 10,
+        marginRight: 12,
     },
     input: {
         flex: 1,
         fontSize: 16,
-        color: '#333',
+        color: '#3E2723',
     },
     button: {
         backgroundColor: '#2E7D32',
-        padding: 18,
-        borderRadius: 12,
+        height: 60,
+        borderRadius: 15,
+        justifyContent: 'center',
         alignItems: 'center',
         shadowColor: '#2E7D32',
-        shadowOffset: {
-            width: 0,
-            height: 4,
-        },
-        shadowOpacity: 0.3,
-        shadowRadius: 6,
-        elevation: 4,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.4,
+        shadowRadius: 8,
+        elevation: 5,
     },
     buttonDisabled: {
         backgroundColor: '#A5D6A7',
-        shadowOpacity: 0,
     },
     buttonText: {
         color: '#fff',
         fontSize: 18,
         fontWeight: 'bold',
+        letterSpacing: 0.5,
     },
     footer: {
         flexDirection: 'row',
         justifyContent: 'center',
-        marginTop: 25,
+        marginTop: 30,
     },
     footerText: {
-        color: '#666',
-        fontSize: 14,
+        color: '#5D4037',
+        fontSize: 15,
     },
     link: {
         color: '#2E7D32',
         fontWeight: 'bold',
-        fontSize: 14,
+        fontSize: 15,
+        textDecorationLine: 'underline',
     },
 });
+

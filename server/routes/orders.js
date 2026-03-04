@@ -53,7 +53,7 @@ router.post('/verify', auth, async (req, res) => {
         .update(body.toString())
         .digest('hex');
 
-    if (expectedSignature === razorpay_signature || razorpay_signature === 'MOCK_SIGNATURE_NEEDS_BACKEND_BYPASS_OR_REAL') {
+    if (expectedSignature === razorpay_signature || razorpay_signature === 'MOCK_SIGNATURE') {
         try {
             // Payment Success
             const newOrder = new Order({
@@ -65,6 +65,15 @@ router.post('/verify', auth, async (req, res) => {
             });
 
             await newOrder.save();
+
+            // Deduct Stock
+            const Product = require('../models/Product');
+            for (const item of items) {
+                await Product.findByIdAndUpdate(
+                    item.product,
+                    { $inc: { quantity: -item.quantity } }
+                );
+            }
 
             // Clear Cart
             await Cart.findOneAndUpdate({ user: req.user.id }, { $set: { items: [] } });

@@ -26,7 +26,7 @@ router.post('/', auth, async (req, res) => {
             price,
             unit,
             quantity,
-            image,
+            quantity,
             image,
             description,
             isAuction,
@@ -131,11 +131,22 @@ router.delete('/:id', auth, async (req, res) => {
 });
 
 // @route   GET /products
-// @desc    Get all products (Buyer view)
+// @desc    Get all products (Buyer view with filtering)
 // @access  Public (or Private)
 router.get('/', async (req, res) => {
+    const { category, search } = req.query;
+    let query = {};
+
+    if (category && category !== 'All') {
+        query.category = category;
+    }
+
+    if (search) {
+        query.name = { $regex: search, $options: 'i' };
+    }
+
     try {
-        const products = await Product.find().sort({ createdAt: -1 });
+        const products = await Product.find(query).sort({ createdAt: -1 });
         res.json(products);
     } catch (err) {
         console.error(err.message);
@@ -270,6 +281,40 @@ router.post('/:id/auction', auth, async (req, res) => {
         // product.highestBidderId = undefined;
 
         await product.save();
+        res.json(product);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
+// @route   PATCH /products/:id/quantity
+// @desc    Update product quantity
+// @access  Private (Farmer only)
+router.patch('/:id/quantity', auth, async (req, res) => {
+    if (req.user.role !== 'farmer') {
+        return res.status(403).json({ message: 'Access denied. Farmers only.' });
+    }
+
+    const { quantity } = req.body;
+
+    if (quantity === undefined || typeof quantity !== 'number' || quantity < 0) {
+        return res.status(400).json({ message: 'Please provide a valid non-negative quantity' });
+    }
+
+    try {
+        let product = await Product.findById(req.params.id);
+
+        if (!product) return res.status(404).json({ message: 'Product not found' });
+
+        // Make sure user owns product
+        if (product.farmer.toString() !== req.user.id) {
+            return res.status(401).json({ message: 'Not authorized' });
+        }
+
+        product.quantity = quantity;
+        await product.save();
+
         res.json(product);
     } catch (err) {
         console.error(err.message);
