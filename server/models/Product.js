@@ -41,6 +41,10 @@ const ProductSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    location: {
+        latitude: { type: Number },
+        longitude: { type: Number },
+    },
     isAgriWaste: {
         type: Boolean,
         default: false

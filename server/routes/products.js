@@ -4,6 +4,20 @@ const auth = require('../middleware/auth');
 const Product = require('../models/Product');
 const Order = require('../models/Order');
 
+// Helper function to calculate distance using Haversine formula
+function getDistance(lat1, lon1, lat2, lon2) {
+    if (lat1 == null || lon1 == null || lat2 == null || lon2 == null) return null;
+    const R = 6371; // Radius of the earth in km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c; // Distance in km
+}
+
 // @route   POST /products
 // @desc    Add a new product
 // @access  Private (Farmer only)
@@ -12,7 +26,7 @@ router.post('/', auth, async (req, res) => {
         return res.status(403).json({ message: 'Access denied. Farmers only.' });
     }
 
-    const { name, category, price, unit, quantity, image, description, isAuction, basePrice, auctionEndTime, isAgriWaste } = req.body;
+    const { name, category, price, unit, quantity, image, description, isAuction, basePrice, auctionEndTime, isAgriWaste, location } = req.body;
 
     if (!name || !category || !price || !unit || !quantity) {
         return res.status(400).json({ message: 'Please enter all required fields' });
@@ -33,6 +47,7 @@ router.post('/', auth, async (req, res) => {
             basePrice,
             auctionEndTime,
             isAgriWaste: isAgriWaste || false,
+            location,
             highestBid: isAuction ? 0 : undefined
         });
 
@@ -142,7 +157,7 @@ router.delete('/:id', auth, async (req, res) => {
 // @desc    Get all products (Buyer view with filtering)
 // @access  Public (or Private)
 router.get('/', async (req, res) => {
-    const { category, search } = req.query;
+    const { category, search, buyerLat, buyerLng } = req.query;
     let query = {};
 
     if (category && category !== 'All') {
@@ -160,7 +175,23 @@ router.get('/', async (req, res) => {
     }
 
     try {
-        const products = await Product.find(query).sort({ createdAt: -1 });
+        let products = await Product.find(query).sort({ createdAt: -1 });
+
+        if (buyerLat && buyerLng) {
+            products = products.map(p => {
+                const productObj = p.toObject();
+                if (productObj.location && productObj.location.latitude != null && productObj.location.longitude != null) {
+                    productObj.distance = getDistance(
+                        parseFloat(buyerLat),
+                        parseFloat(buyerLng),
+                        productObj.location.latitude,
+                        productObj.location.longitude
+                    );
+                }
+                return productObj;
+            });
+        }
+
         res.json(products);
     } catch (err) {
         console.error(err.message);
