@@ -12,7 +12,7 @@ router.post('/', auth, async (req, res) => {
         return res.status(403).json({ message: 'Access denied. Farmers only.' });
     }
 
-    const { name, category, price, unit, quantity, image, description, isAuction, basePrice, auctionEndTime } = req.body;
+    const { name, category, price, unit, quantity, image, description, isAuction, basePrice, auctionEndTime, isAgriWaste } = req.body;
 
     if (!name || !category || !price || !unit || !quantity) {
         return res.status(400).json({ message: 'Please enter all required fields' });
@@ -32,6 +32,7 @@ router.post('/', auth, async (req, res) => {
             isAuction,
             basePrice,
             auctionEndTime,
+            isAgriWaste: isAgriWaste || false,
             highestBid: isAuction ? 0 : undefined
         });
 
@@ -52,7 +53,14 @@ router.get('/my', auth, async (req, res) => {
     }
 
     try {
-        const products = await Product.find({ farmer: req.user.id }).sort({ createdAt: -1 });
+        const query = { farmer: req.user.id };
+        if (req.query.isAgriWaste === 'true') {
+            query.isAgriWaste = true;
+        } else {
+            query.isAgriWaste = { $ne: true };
+        }
+
+        const products = await Product.find(query).sort({ createdAt: -1 });
         res.json(products);
     } catch (err) {
         console.error(err.message);
@@ -145,11 +153,34 @@ router.get('/', async (req, res) => {
         query.name = { $regex: search, $options: 'i' };
     }
 
+    if (req.query.isAgriWaste === 'true') {
+        query.isAgriWaste = true;
+    } else {
+        query.isAgriWaste = { $ne: true };
+    }
+
     try {
         const products = await Product.find(query).sort({ createdAt: -1 });
         res.json(products);
     } catch (err) {
         console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
+// @route   GET /products/:id
+// @desc    Get product by ID
+// @access  Public
+router.get('/:id', async (req, res) => {
+    try {
+        const product = await Product.findById(req.params.id);
+        if (!product) return res.status(404).json({ message: 'Product not found' });
+        res.json(product);
+    } catch (err) {
+        console.error(err.message);
+        if (err.kind === 'ObjectId') {
+            return res.status(404).json({ message: 'Product not found' });
+        }
         res.status(500).send('Server Error');
     }
 });

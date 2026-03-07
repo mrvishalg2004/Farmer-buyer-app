@@ -1,10 +1,10 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, FlatList, StyleSheet, ActivityIndicator, Image, TouchableOpacity, Alert, TextInput, ScrollView, Dimensions } from 'react-native';
+import { View, Text, FlatList, StyleSheet, ActivityIndicator, Image, TouchableOpacity, TextInput, Dimensions } from 'react-native';
 import axios from 'axios';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import Animated, { FadeInDown, FadeInRight } from 'react-native-reanimated';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 
 import { API_URL } from '@/constants/config';
 import { Colors, Shadows } from '@/constants/theme';
@@ -16,7 +16,6 @@ interface Product {
     _id: string;
     name: string;
     category: string;
-    price: number;
     unit: string;
     quantity: number;
     image?: string;
@@ -26,31 +25,19 @@ interface Product {
     auctionEndTime?: string;
 }
 
-const CATEGORY_ICONS: Record<string, any> = {
-    'All': 'apps',
-    'Vegetables': 'carrot',
-    'Fruits': 'food-apple',
-    'Grains': 'barley',
-    'Dairy': 'bottle-wine',
-    'Others': 'dots-horizontal'
-};
-
-export default function BuyerHome() {
+export default function BuyerAgriWaste() {
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
-    const [selectedCategory, setSelectedCategory] = useState('All');
     const router = useRouter();
     const { logout } = useAuth();
-
-    const categories = ['All', 'Vegetables', 'Fruits', 'Grains', 'Dairy', 'Others'];
 
     const fetchProducts = async () => {
         try {
             setLoading(true);
             const res = await axios.get(`${API_URL}/products`, {
                 params: {
-                    category: selectedCategory,
+                    isAgriWaste: 'true',
                     search: search
                 }
             });
@@ -68,22 +55,13 @@ export default function BuyerHome() {
         }, 500);
 
         return () => clearTimeout(delayDebounce);
-    }, [search, selectedCategory]);
+    }, [search]);
 
     useFocusEffect(
         useCallback(() => {
             fetchProducts();
-        }, [selectedCategory])
+        }, [])
     );
-
-    const addToCart = async (productId: string) => {
-        try {
-            await axios.post(`${API_URL}/cart`, { productId, quantity: 1 });
-            Alert.alert("Success", "Added to your basket! 🧺");
-        } catch (error: any) {
-            Alert.alert("Error", error.response?.data?.message || "Could not add to cart");
-        }
-    };
 
     const renderItem = ({ item, index }: { item: Product; index: number }) => (
         <Animated.View
@@ -95,12 +73,6 @@ export default function BuyerHome() {
                     source={{ uri: item.image || 'https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=200&h=200&auto=format&fit=crop' }}
                     style={styles.image}
                 />
-                {item.quantity > 0 && !item.isAuction && (
-                    <View style={styles.tagFresh}>
-                        <MaterialCommunityIcons name="leaf" size={12} color="#fff" />
-                        <Text style={styles.tagText}>FRESH</Text>
-                    </View>
-                )}
             </View>
 
             <View style={styles.info}>
@@ -109,44 +81,26 @@ export default function BuyerHome() {
                     <Text style={styles.name} numberOfLines={1}>{item.name}</Text>
                     <Text style={styles.priceContainer}>
                         <Text style={styles.currency}>₹</Text>
-                        <Text style={styles.price}>{item.isAuction ? item.basePrice : item.price}</Text>
+                        <Text style={styles.price}>{item.highestBid || item.basePrice}</Text>
                         <Text style={styles.unit}> / {item.unit}</Text>
                     </Text>
                 </View>
 
                 <View style={styles.cardFooter}>
-                    {item.isAuction ? (
-                        <View style={styles.auctionBadge}>
-                            <MaterialCommunityIcons name="gavel" size={14} color={Colors.light.accent} />
-                            <Text style={styles.auctionText}>Auction</Text>
-                        </View>
-                    ) : (
-                        item.quantity > 0 ? (
-                            <Text style={styles.stock}>In Stock: {item.quantity}</Text>
-                        ) : (
-                            <Text style={styles.outOfStock}>Sold Out</Text>
-                        )
-                    )}
+                    <View style={styles.auctionBadge}>
+                        <MaterialCommunityIcons name="gavel" size={14} color={Colors.light.accent} />
+                        <Text style={styles.auctionText}>Current Bid</Text>
+                    </View>
                 </View>
             </View>
 
             <View style={styles.actionContainer}>
-                {item.isAuction ? (
-                    <TouchableOpacity
-                        style={styles.bidBtn}
-                        onPress={() => router.push(`/product/${item._id}` as any)}
-                    >
-                        <MaterialCommunityIcons name="gavel" size={20} color="#fff" />
-                    </TouchableOpacity>
-                ) : (
-                    <TouchableOpacity
-                        style={[styles.addBtn, item.quantity === 0 && styles.disabledBtn]}
-                        onPress={() => addToCart(item._id)}
-                        disabled={item.quantity === 0}
-                    >
-                        <Ionicons name="cart-outline" size={20} color="#fff" />
-                    </TouchableOpacity>
-                )}
+                <TouchableOpacity
+                    style={styles.bidBtn}
+                    onPress={() => router.push(`/product/${item._id}` as any)}
+                >
+                    <MaterialCommunityIcons name="gavel" size={20} color="#fff" />
+                </TouchableOpacity>
             </View>
         </Animated.View>
     );
@@ -161,8 +115,8 @@ export default function BuyerHome() {
             >
                 <View style={styles.headerTop}>
                     <View>
-                        <Text style={styles.welcomeText}>Fresh from Farms</Text>
-                        <Text style={styles.brandText}>KHETKART</Text>
+                        <Text style={styles.welcomeText}>Sustainable Sourcing</Text>
+                        <Text style={styles.brandText}>Agri Waste</Text>
                     </View>
                     <View style={styles.headerActions}>
                         <TouchableOpacity style={styles.iconBtn} onPress={logout}>
@@ -175,7 +129,7 @@ export default function BuyerHome() {
                     <Ionicons name="search" size={20} color={Colors.light.tint} />
                     <TextInput
                         style={styles.input}
-                        placeholder="Search for fresh produce..."
+                        placeholder="Search for waste materials..."
                         placeholderTextColor="#999"
                         value={search}
                         onChangeText={setSearch}
@@ -189,57 +143,15 @@ export default function BuyerHome() {
             </LinearGradient>
 
             <View style={styles.content}>
-                <View style={styles.sectionHeader}>
-                    <Text style={styles.sectionTitle}>Categories</Text>
-                </View>
-
-                <View>
-                    <ScrollView
-                        horizontal
-                        showsHorizontalScrollIndicator={false}
-                        contentContainerStyle={styles.categoryList}
-                    >
-                        {categories.map((cat, index) => (
-                            <Animated.View
-                                key={cat}
-                                entering={FadeInRight.delay(index * 50).duration(400)}
-                            >
-                                <TouchableOpacity
-                                    style={[
-                                        styles.categoryBtn,
-                                        selectedCategory === cat && styles.activeCategoryBtn
-                                    ]}
-                                    onPress={() => setSelectedCategory(cat)}
-                                >
-                                    <View style={[
-                                        styles.catIconContainer,
-                                        selectedCategory === cat && styles.activeCatIconContainer
-                                    ]}>
-                                        <MaterialCommunityIcons
-                                            name={CATEGORY_ICONS[cat] || 'grid'}
-                                            size={20}
-                                            color={selectedCategory === cat ? '#fff' : Colors.light.tint}
-                                        />
-                                    </View>
-                                    <Text style={[
-                                        styles.categoryText,
-                                        selectedCategory === cat && styles.activeCategoryText
-                                    ]}>{cat}</Text>
-                                </TouchableOpacity>
-                            </Animated.View>
-                        ))}
-                    </ScrollView>
-                </View>
-
                 <View style={styles.marketHeader}>
-                    <Text style={styles.sectionTitle}>Marketplace</Text>
-                    <Text style={styles.itemCount}>{products.length} products found</Text>
+                    <Text style={styles.sectionTitle}>Auctions</Text>
+                    <Text style={styles.itemCount}>{products.length} listings found</Text>
                 </View>
 
                 {loading ? (
                     <View style={styles.center}>
                         <ActivityIndicator size="large" color={Colors.light.tint} />
-                        <Text style={styles.loaderText}>Fetching fresh produce...</Text>
+                        <Text style={styles.loaderText}>Fetching Agri Waste listings...</Text>
                     </View>
                 ) : (
                     <FlatList
@@ -249,8 +161,8 @@ export default function BuyerHome() {
                         contentContainerStyle={styles.list}
                         ListEmptyComponent={
                             <View style={styles.emptyContainer}>
-                                <MaterialCommunityIcons name="leaf-off" size={64} color={Colors.light.border} />
-                                <Text style={styles.empty}>No products available in this category.</Text>
+                                <MaterialCommunityIcons name="leaf-maple" size={64} color={Colors.light.border} />
+                                <Text style={styles.empty}>No Agri Waste auctions currently active.</Text>
                             </View>
                         }
                     />
@@ -314,52 +226,7 @@ const styles = StyleSheet.create({
     },
     content: {
         flex: 1,
-    },
-    sectionHeader: {
-        paddingHorizontal: 20,
         marginTop: 20,
-        marginBottom: 10,
-    },
-    sectionTitle: {
-        fontSize: 20,
-        fontWeight: '700',
-        color: Colors.light.text,
-    },
-    categoryList: {
-        paddingHorizontal: 15,
-        paddingBottom: 15,
-    },
-    categoryBtn: {
-        alignItems: 'center',
-        marginRight: 15,
-        padding: 5,
-    },
-    activeCategoryBtn: {
-        borderRadius: 20,
-    },
-    catIconContainer: {
-        width: 50,
-        height: 50,
-        borderRadius: 15,
-        backgroundColor: '#fff',
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginBottom: 6,
-        borderWidth: 1,
-        borderColor: Colors.light.border,
-    },
-    activeCatIconContainer: {
-        backgroundColor: Colors.light.tint,
-        borderColor: Colors.light.tint,
-    },
-    categoryText: {
-        fontSize: 12,
-        color: Colors.light.earthy,
-        fontWeight: '600',
-    },
-    activeCategoryText: {
-        color: Colors.light.tint,
-        fontWeight: '700',
     },
     marketHeader: {
         flexDirection: 'row',
@@ -367,6 +234,11 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingHorizontal: 20,
         marginBottom: 10,
+    },
+    sectionTitle: {
+        fontSize: 20,
+        fontWeight: '700',
+        color: Colors.light.text,
     },
     itemCount: {
         fontSize: 12,
@@ -402,23 +274,6 @@ const styles = StyleSheet.create({
         height: 90,
         borderRadius: 16,
         backgroundColor: '#f0f0f0',
-    },
-    tagFresh: {
-        position: 'absolute',
-        top: -5,
-        left: -5,
-        backgroundColor: Colors.light.tint,
-        paddingHorizontal: 8,
-        paddingVertical: 2,
-        borderRadius: 8,
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    tagText: {
-        color: '#fff',
-        fontSize: 8,
-        fontWeight: '900',
-        marginLeft: 2,
     },
     info: {
         flex: 1,
@@ -459,16 +314,6 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
     },
-    stock: {
-        fontSize: 11,
-        color: Colors.light.secondaryText,
-        fontWeight: '600',
-    },
-    outOfStock: {
-        fontSize: 11,
-        color: '#D32F2F',
-        fontWeight: '600',
-    },
     auctionBadge: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -486,14 +331,6 @@ const styles = StyleSheet.create({
     actionContainer: {
         marginLeft: 10,
     },
-    addBtn: {
-        backgroundColor: Colors.light.tint,
-        width: 44,
-        height: 44,
-        borderRadius: 14,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
     bidBtn: {
         backgroundColor: Colors.light.accent,
         width: 44,
@@ -501,9 +338,6 @@ const styles = StyleSheet.create({
         borderRadius: 14,
         justifyContent: 'center',
         alignItems: 'center',
-    },
-    disabledBtn: {
-        backgroundColor: '#E0E0E0',
     },
     emptyContainer: {
         alignItems: 'center',

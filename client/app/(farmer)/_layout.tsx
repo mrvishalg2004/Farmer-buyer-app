@@ -71,6 +71,19 @@ export default function FarmerLayout() {
                 }}
             />
             <Tabs.Screen
+                name="agri-waste"
+                options={{
+                    title: 'Agri Waste',
+                    tabBarIcon: ({ color, focused }) => (
+                        <MaterialCommunityIcons
+                            name={focused ? "leaf-maple" : "leaf-maple"}
+                            size={26}
+                            color={color}
+                        />
+                    ),
+                }}
+            />
+            <Tabs.Screen
                 name="orders"
                 options={{
                     title: 'Sales',

@@ -83,25 +83,8 @@ export default function ProductDetails() {
 
     const fetchProduct = async () => {
         try {
-            const res = await axios.get(`${API_URL}/products`);
-            // In a real app we would have a specific GET /products/:id endpoint
-            // For now, filtering from list or assuming backend supports GET /products/:id if implemented
-            // Since we didn't explicitly check for GET /products/:id in products.js (only PUT/DELETE/GET-ALL), 
-            // checking if we should use GET /products and filter.
-            // Wait, products.js has GET /products (all) and GET /products/my. 
-            // It does NOT have GET /products/:id public route.
-            // I should probably add one or just use the list. 
-            // For better performance/correctness I should add GET /products/:id to products.js.
-            // But for now to avoid context switching I will filter client side if list is small, 
-            // OR I can quickly check products.js again.
-            // Let's assume for now we filter from the main list or I'll implement GET /:id Public.
-            // Actually, looking at products.js, it has router.put('/:id'), router.delete('/:id') which are private.
-            // It lacks a public GET /:id.
-
-            // To proceed smoothly, I will just filter from all products. In production this is bad practice.
-            // Let's rely on finding it from the full list for now.
-            const allProducts = res.data as Product[];
-            const found = allProducts.find((p: Product) => p._id === id);
+            const res = await axios.get(`${API_URL}/products/${id}`);
+            const found = res.data as Product;
 
             if (found) {
                 console.log('--- Product Debug ---');

@@ -41,6 +41,11 @@ const ProductSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    isAgriWaste: {
+        type: Boolean,
+        default: false
+    },
+
     basePrice: {
         type: Number,
         default: 0

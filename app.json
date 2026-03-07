@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "9a06e8f7-5307-4a3e-9d3e-e56852ac48d6"
+      }
+    },
+    "android": {
+      "package": "com.vishalr2t.khetkart"
+    }
+  }
+}

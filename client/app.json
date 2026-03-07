@@ -44,7 +44,8 @@
           }
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      "expo-localization"
     ],
     "experiments": {
       "typedRoutes": true,
@@ -53,9 +54,9 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "9a06e8f7-5307-4a3e-9d3e-e56852ac48d6"
+        "projectId": "b93d007d-b8f5-4049-bcbc-0525dcec40c2"
       }
     },
-    "owner": "vishalr2t"
+    "owner": "vishalgolhar"
   }
 }

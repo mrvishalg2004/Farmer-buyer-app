@@ -21,10 +21,16 @@ app.use('/cart', require('./routes/cart'));
 app.use('/orders', require('./routes/orders'));
 app.use('/bids', require('./routes/bids'));
 
-// Database Connection
-mongoose.connect(process.env.MONGO_URI)
-    .then(() => console.log('MongoDB connected'))
-    .catch(err => console.log('MongoDB connection error:', err));
+// Database Connection (local MongoDB - viewable via MongoDB Compass)
+mongoose.connect(process.env.MONGO_URI, {
+    serverSelectionTimeoutMS: 5000,
+})
+    .then(() => console.log(`MongoDB connected: ${process.env.MONGO_URI}`))
+    .catch(err => {
+        console.error('MongoDB connection error:', err.message);
+        console.error('Make sure MongoDB is running locally (mongod) and MongoDB Compass can connect to mongodb://localhost:27017');
+        process.exit(1);
+    });
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
