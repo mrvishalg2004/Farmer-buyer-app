@@ -5,6 +5,7 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
+import { useTranslation } from 'react-i18next';
 
 import { API_URL } from '@/constants/config';
 import { Colors, Shadows } from '@/constants/theme';
@@ -35,6 +36,7 @@ export default function FarmerAgriWaste() {
     const [loading, setLoading] = useState(true);
     const { logout } = useAuth();
     const router = useRouter();
+    const { t } = useTranslation();
 
     const fetchBids = async () => {
         try {
@@ -190,16 +192,18 @@ export default function FarmerAgriWaste() {
             >
                 <View style={styles.headerTop}>
                     <View>
-                        <Text style={styles.dashboardTitle}>Agri Waste</Text>
-                        <Text style={styles.dashboardSubtitle}>Manage waste listings</Text>
+                        <Text style={styles.dashboardTitle}>{t('agriWaste.dashboardTitle')}</Text>
+                        <Text style={styles.dashboardSubtitle}>{t('agriWaste.dashboardSubtitle')}</Text>
                     </View>
-                    <View style={{ flexDirection: 'row' }}>
-                        <TouchableOpacity style={[styles.logoutBtn, { marginRight: 10 }]} onPress={() => router.push('/(farmer)/add-agri-waste')}>
-                            <MaterialCommunityIcons name="plus" size={24} color="#fff" />
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.logoutBtn} onPress={logout}>
-                            <MaterialCommunityIcons name="logout" size={24} color="#fff" />
-                        </TouchableOpacity>
+                    <View style={styles.headerActions}>
+                        <View style={{ flexDirection: 'row' }}>
+                            <TouchableOpacity style={[styles.logoutBtn, { marginRight: 10 }]} onPress={() => router.push('/(farmer)/add-agri-waste')}>
+                                <MaterialCommunityIcons name="plus" size={24} color="#fff" />
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.logoutBtn} onPress={logout}>
+                                <MaterialCommunityIcons name="logout" size={24} color="#fff" />
+                            </TouchableOpacity>
+                        </View>
                     </View>
                 </View>
 
@@ -260,6 +264,10 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: '#E8F5E9',
         fontWeight: '500',
+    },
+    headerActions: {
+        flexDirection: 'row',
+        alignItems: 'center',
     },
     logoutBtn: {
         backgroundColor: 'rgba(255,255,255,0.2)',

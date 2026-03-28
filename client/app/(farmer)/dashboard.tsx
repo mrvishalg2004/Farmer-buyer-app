@@ -5,6 +5,7 @@ import { useFocusEffect } from 'expo-router';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeInDown, Layout } from 'react-native-reanimated';
+import { useTranslation } from 'react-i18next';
 
 import { API_URL } from '@/constants/config';
 import { Colors, Shadows } from '@/constants/theme';
@@ -28,7 +29,8 @@ export default function FarmerDashboard() {
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const [newQuantity, setNewQuantity] = useState('');
     const [modalVisible, setModalVisible] = useState(false);
-    const { logout } = useAuth();
+    const { logout, user } = useAuth();
+    const { t } = useTranslation();
 
     const fetchProducts = async () => {
         try {
@@ -165,12 +167,14 @@ export default function FarmerDashboard() {
             >
                 <View style={styles.headerTop}>
                     <View>
-                        <Text style={styles.headerTitle}>My Harvest</Text>
-                        <Text style={styles.headerSubtitle}>Manage your listings</Text>
+                        <Text style={styles.headerTitle}>{t('farmerDashboard.welcome')} {user?.name}</Text>
+                        <Text style={styles.headerSubtitle}>{t('farmerDashboard.overview')}</Text>
                     </View>
-                    <TouchableOpacity style={styles.logoutBtn} onPress={logout}>
-                        <MaterialCommunityIcons name="logout" size={24} color="#fff" />
-                    </TouchableOpacity>
+                    <View style={styles.headerActions}>
+                        <TouchableOpacity style={styles.logoutBtn} onPress={logout}>
+                            <MaterialCommunityIcons name="logout" size={24} color="#fff" />
+                        </TouchableOpacity>
+                    </View>
                 </View>
 
                 <View style={styles.statsRow}>
@@ -277,6 +281,10 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: '#E8F5E9',
         fontWeight: '500',
+    },
+    headerActions: {
+        flexDirection: 'row',
+        alignItems: 'center',
     },
     logoutBtn: {
         backgroundColor: 'rgba(255,255,255,0.2)',

@@ -1,0 +1,90 @@
+{
+    "common": {
+        "loading": "लोड होत आहे...",
+        "searchPlaceholder": "उत्पादने शोधा...",
+        "save": "जतन करा",
+        "cancel": "रद्द करा",
+        "accept": "स्वीकारा",
+        "sold": "विकले",
+        "highestBid": "सर्वोच्च बोली",
+        "currentBid": "सध्याची बोली",
+        "success": "यशस्वी",
+        "error": "त्रुटी"
+    },
+    "tabs": {
+        "home": "होम",
+        "market": "बाजार",
+        "cart": "टोपली",
+        "auctions": "लिलाव",
+        "agriWaste": "कृषी कचरा",
+        "orders": "ऑर्डर्स",
+        "sales": "विक्री",
+        "profile": "प्रोफाइल",
+        "dashboard": "डॅशबोर्ड"
+    },
+    "farmerDashboard": {
+        "welcome": "पूनरागमनाबद्दल स्वागत आहे,",
+        "overview": "आढावा",
+        "totalProducts": "एकूण उत्पादने",
+        "activeAuctions": "सक्रिय लिलाव",
+        "quickActions": "जलद कृती",
+        "addProduce": "माल जोड",
+        "myListings": "माझ्या याद्या",
+        "viewAll": "सर्व पहा",
+        "rs": "₹",
+        "per": "/"
+    },
+    "buyerHome": {
+        "welcome": "नमस्कार",
+        "findFresh": "ताज्या उत्पादनांचा शोध घ्या",
+        "categories": "श्रेण्या",
+        "featured": "वैशिष्ट्यीकृत उत्पादने",
+        "noProducts": "कोणतीही उत्पादने उपलब्ध नाहीत"
+    },
+    "agriWaste": {
+        "dashboardTitle": "कृषी कचरा",
+        "dashboardSubtitle": "कचऱ्याची यादी व्यवस्थापित करा",
+        "sustainableSourcing": "शाश्वत सोर्सिंग",
+        "searchPlaceholder": "कचरा साहित्य शोधा...",
+        "active": "सक्रिय",
+        "complete": "पूर्ण",
+        "recentBids": "अलीकडील बोली",
+        "waitingBid": "पहिल्या बोलीची वाट पाहत आहे...",
+        "noListingsTitle": "कोणताही कृषी कचरा सूचीबद्ध नाही",
+        "noListingsMessage": "लिलावाद्वारे कृषी कचरा विकण्यासाठी यादी जोडा.",
+        "listingsFound": "{{count}} याद्या सापडल्या",
+        "noActiveAuctions": "सध्या कोणताही कृषी कचरा लिलाव सक्रिय नाही."
+    },
+    "addAgriWaste": {
+        "title": "कृषी कचऱ्याची यादी करा",
+        "subtitle": "तुमच्या कचरा साहित्यासाठी लिलाव सुरू करा",
+        "materialType": "साहित्याचा प्रकार",
+        "typePlaceholder": "उदा. गव्हाचा भुसा, तांदळाचा भुसा",
+        "imageUrl": "इमेज URL",
+        "startingBid": "सुरुवातीची बोली (₹)",
+        "quantity": "प्रमाण (टन)",
+        "duration": "लिलावाचा कालावधी (दिवस)",
+        "description": "वर्णन",
+        "descPlaceholder": "कचरा साहित्याबद्दल तपशील द्या...",
+        "startAuction": "लिलाव सुरू करा"
+    },
+    "language": {
+        "title": "भाषा",
+        "select": "भाषा निवडा",
+        "english": "English",
+        "hindi": "हिंदी (Hindi)",
+        "marathi": "मराठी (Marathi)"
+    },
+    "profileSettings": {
+        "title": "प्रोफाईल आणि सेटिंग्ज",
+        "name": "नाव",
+        "email": "ईमेल",
+        "security": "सुरक्षा",
+        "currentPassword": "सध्याचा पासवर्ड",
+        "newPassword": "नवीन पासवर्ड",
+        "updatePassword": "पासवर्ड अपडेट करा",
+        "passwordUpdated": "पासवर्ड यशस्वीरित्या बदलला!",
+        "passwordsMismatch": "पासवर्ड अपडेट अयशस्वी.",
+        "fillFields": "कृपया सर्व पासवर्ड फील्ड भरा."
+    }
+}

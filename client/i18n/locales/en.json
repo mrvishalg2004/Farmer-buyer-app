@@ -1,0 +1,90 @@
+{
+    "common": {
+        "loading": "Loading...",
+        "searchPlaceholder": "Search products...",
+        "save": "Save",
+        "cancel": "Cancel",
+        "accept": "Accept",
+        "sold": "SOLD",
+        "highestBid": "Highest Bid",
+        "currentBid": "Current Bid",
+        "success": "Success",
+        "error": "Error"
+    },
+    "tabs": {
+        "home": "Home",
+        "market": "Market",
+        "cart": "Basket",
+        "auctions": "Auctions",
+        "agriWaste": "Agri Waste",
+        "orders": "Orders",
+        "sales": "Sales",
+        "profile": "Profile",
+        "dashboard": "Dashboard"
+    },
+    "farmerDashboard": {
+        "welcome": "Welcome back,",
+        "overview": "Overview",
+        "totalProducts": "Total Products",
+        "activeAuctions": "Active Auctions",
+        "quickActions": "Quick Actions",
+        "addProduce": "Add Produce",
+        "myListings": "My Listings",
+        "viewAll": "View All",
+        "rs": "₹",
+        "per": "/"
+    },
+    "buyerHome": {
+        "welcome": "Hello",
+        "findFresh": "Find Fresh Produce",
+        "categories": "Categories",
+        "featured": "Featured Products",
+        "noProducts": "No products available"
+    },
+    "agriWaste": {
+        "dashboardTitle": "Agri Waste",
+        "dashboardSubtitle": "Manage waste listings",
+        "sustainableSourcing": "Sustainable Sourcing",
+        "searchPlaceholder": "Search for waste materials...",
+        "active": "Active",
+        "complete": "Complete",
+        "recentBids": "Recent Bids",
+        "waitingBid": "Waiting for first bid...",
+        "noListingsTitle": "No Agri Waste Listed",
+        "noListingsMessage": "Add a listing to sell agricultural waste via auction.",
+        "listingsFound": "{{count}} listings found",
+        "noActiveAuctions": "No Agri Waste auctions currently active."
+    },
+    "addAgriWaste": {
+        "title": "List Agri Waste",
+        "subtitle": "Start an auction for your waste materials",
+        "materialType": "Type of Material",
+        "typePlaceholder": "e.g. Wheat Straw, Rice Husk",
+        "imageUrl": "Image URL",
+        "startingBid": "Starting Bid (₹)",
+        "quantity": "Quantity (Tons)",
+        "duration": "Auction Duration (Days)",
+        "description": "Description",
+        "descPlaceholder": "Provide details about the waste material...",
+        "startAuction": "START AUCTION"
+    },
+    "language": {
+        "title": "Language",
+        "select": "Select Language",
+        "english": "English",
+        "hindi": "हिंदी (Hindi)",
+        "marathi": "मराठी (Marathi)"
+    },
+    "profileSettings": {
+        "title": "Profile & Settings",
+        "name": "Name",
+        "email": "Email",
+        "security": "Security",
+        "currentPassword": "Current Password",
+        "newPassword": "New Password",
+        "updatePassword": "Update Password",
+        "passwordUpdated": "Password updated successfully!",
+        "passwordsMismatch": "Password update failed.",
+        "fillFields": "Please fill all password fields."
+    }
+}

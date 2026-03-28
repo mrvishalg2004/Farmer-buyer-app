@@ -2,9 +2,11 @@ import { Tabs } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useAuth } from '../../context/AuthContext';
 import { Colors } from '@/constants/theme';
+import { useTranslation } from 'react-i18next';
 
 export default function FarmerLayout() {
     const { logout } = useAuth();
+    const { t } = useTranslation();
 
     return (
         <Tabs screenOptions={{
@@ -34,7 +36,7 @@ export default function FarmerLayout() {
             <Tabs.Screen
                 name="dashboard"
                 options={{
-                    title: 'My Farm',
+                    title: t('tabs.dashboard'),
                     tabBarIcon: ({ color, focused }) => (
                         <MaterialCommunityIcons
                             name={focused ? "sprout" : "sprout-outline"}
@@ -47,7 +49,7 @@ export default function FarmerLayout() {
             <Tabs.Screen
                 name="add-product"
                 options={{
-                    title: 'Add New',
+                    title: t('farmerDashboard.addProduce'),
                     tabBarIcon: ({ color, focused }) => (
                         <MaterialCommunityIcons
                             name={focused ? "plus-circle" : "plus-circle-outline"}
@@ -60,7 +62,7 @@ export default function FarmerLayout() {
             <Tabs.Screen
                 name="bids"
                 options={{
-                    title: 'Auctions',
+                    title: t('tabs.auctions'),
                     tabBarIcon: ({ color, focused }) => (
                         <MaterialCommunityIcons
                             name={focused ? "gavel" : "gavel"}
@@ -73,7 +75,7 @@ export default function FarmerLayout() {
             <Tabs.Screen
                 name="agri-waste"
                 options={{
-                    title: 'Agri Waste',
+                    title: t('tabs.agriWaste'),
                     tabBarIcon: ({ color, focused }) => (
                         <MaterialCommunityIcons
                             name={focused ? "leaf-maple" : "leaf-maple"}
@@ -86,7 +88,7 @@ export default function FarmerLayout() {
             <Tabs.Screen
                 name="orders"
                 options={{
-                    title: 'Sales',
+                    title: t('tabs.sales'),
                     tabBarIcon: ({ color, focused }) => (
                         <MaterialCommunityIcons
                             name={focused ? "truck-delivery" : "truck-delivery-outline"}
@@ -94,6 +96,25 @@ export default function FarmerLayout() {
                             color={color}
                         />
                     ),
+                }}
+            />
+            <Tabs.Screen
+                name="profile"
+                options={{
+                    title: t('tabs.profile'),
+                    tabBarIcon: ({ color, focused }) => (
+                        <MaterialCommunityIcons
+                            name={focused ? "account" : "account-outline"}
+                            size={26}
+                            color={color}
+                        />
+                    ),
+                }}
+            />
+            <Tabs.Screen
+                name="add-agri-waste"
+                options={{
+                    href: null,
                 }}
             />
         </Tabs>

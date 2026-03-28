@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated';
+import * as Location from 'expo-location';
 
 import { API_URL } from '@/constants/config';
 import { Colors, Shadows } from '@/constants/theme';
@@ -52,6 +53,16 @@ export default function AddProduct() {
 
         setLoading(true);
         try {
+            let location = null;
+            const { status } = await Location.requestForegroundPermissionsAsync();
+            if (status === 'granted') {
+                const currentPos = await Location.getCurrentPositionAsync({});
+                location = {
+                    latitude: currentPos.coords.latitude,
+                    longitude: currentPos.coords.longitude
+                };
+            }
+
             await axios.post(`${API_URL}/products`, {
                 name,
                 category,
@@ -62,7 +73,8 @@ export default function AddProduct() {
                 description,
                 isAuction,
                 basePrice: isAuction ? parseFloat(price) : 0,
-                auctionEndTime: isAuction ? new Date(Date.now() + parseInt(auctionDuration) * 24 * 60 * 60 * 1000) : undefined
+                auctionEndTime: isAuction ? new Date(Date.now() + parseInt(auctionDuration) * 24 * 60 * 60 * 1000) : undefined,
+                location
             });
             Alert.alert('Success', 'Product listed successfully! 🌱');
             router.back();

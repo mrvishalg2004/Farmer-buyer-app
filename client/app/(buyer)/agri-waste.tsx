@@ -5,6 +5,8 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import { useTranslation } from 'react-i18next';
+import * as Location from 'expo-location';
 
 import { API_URL } from '@/constants/config';
 import { Colors, Shadows } from '@/constants/theme';
@@ -23,24 +25,41 @@ interface Product {
     basePrice?: number;
     highestBid?: number;
     auctionEndTime?: string;
+    distance?: number;
 }
 
 export default function BuyerAgriWaste() {
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
+    const [location, setLocation] = useState<{ latitude: number, longitude: number } | null>(null);
     const router = useRouter();
     const { logout } = useAuth();
+    const { t } = useTranslation();
 
     const fetchProducts = async () => {
         try {
             setLoading(true);
-            const res = await axios.get(`${API_URL}/products`, {
-                params: {
-                    isAgriWaste: 'true',
-                    search: search
+            let currentLoc = location;
+            if (!currentLoc) {
+                const { status } = await Location.requestForegroundPermissionsAsync();
+                if (status === 'granted') {
+                    const pos = await Location.getCurrentPositionAsync({});
+                    currentLoc = { latitude: pos.coords.latitude, longitude: pos.coords.longitude };
+                    setLocation(currentLoc);
                 }
-            });
+            }
+
+            const params: any = {
+                isAgriWaste: 'true',
+                search: search
+            };
+            if (currentLoc) {
+                params.buyerLat = currentLoc.latitude;
+                params.buyerLng = currentLoc.longitude;
+            }
+
+            const res = await axios.get(`${API_URL}/products`, { params });
             setProducts(res.data as Product[]);
         } catch (error) {
             console.error(error);
@@ -91,13 +110,20 @@ export default function BuyerAgriWaste() {
                         <MaterialCommunityIcons name="gavel" size={14} color={Colors.light.accent} />
                         <Text style={styles.auctionText}>Current Bid</Text>
                     </View>
+                    {item.distance !== undefined && item.distance > 50 && (
+                        <View style={styles.radiusBadge}>
+                            <MaterialCommunityIcons name="map-marker-distance" size={12} color="#D32F2F" />
+                            <Text style={styles.outOfRadiusText}> Too far ({Math.round(item.distance)}km)</Text>
+                        </View>
+                    )}
                 </View>
             </View>
 
             <View style={styles.actionContainer}>
                 <TouchableOpacity
-                    style={styles.bidBtn}
+                    style={[styles.bidBtn, (item.distance !== undefined && item.distance > 50) && styles.disabledBtn]}
                     onPress={() => router.push(`/product/${item._id}` as any)}
+                    disabled={item.distance !== undefined && item.distance > 50}
                 >
                     <MaterialCommunityIcons name="gavel" size={20} color="#fff" />
                 </TouchableOpacity>
@@ -115,8 +141,8 @@ export default function BuyerAgriWaste() {
             >
                 <View style={styles.headerTop}>
                     <View>
-                        <Text style={styles.welcomeText}>Sustainable Sourcing</Text>
-                        <Text style={styles.brandText}>Agri Waste</Text>
+                        <Text style={styles.welcomeText}>{t('agriWaste.sustainableSourcing')}</Text>
+                        <Text style={styles.brandText}>{t('agriWaste.dashboardTitle')}</Text>
                     </View>
                     <View style={styles.headerActions}>
                         <TouchableOpacity style={styles.iconBtn} onPress={logout}>
@@ -129,7 +155,7 @@ export default function BuyerAgriWaste() {
                     <Ionicons name="search" size={20} color={Colors.light.tint} />
                     <TextInput
                         style={styles.input}
-                        placeholder="Search for waste materials..."
+                        placeholder={t('agriWaste.searchPlaceholder')}
                         placeholderTextColor="#999"
                         value={search}
                         onChangeText={setSearch}
@@ -349,5 +375,22 @@ const styles = StyleSheet.create({
         color: Colors.light.earthy,
         fontSize: 16,
         paddingHorizontal: 40,
+    },
+    radiusBadge: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#FFEBEE',
+        paddingHorizontal: 6,
+        paddingVertical: 2,
+        borderRadius: 4,
+        marginLeft: 8,
+    },
+    outOfRadiusText: {
+        fontSize: 9,
+        fontWeight: '700',
+        color: '#D32F2F',
+    },
+    disabledBtn: {
+        backgroundColor: '#E0E0E0',
     },
 });

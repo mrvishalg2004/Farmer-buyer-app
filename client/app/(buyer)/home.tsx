@@ -5,6 +5,8 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeInDown, FadeInRight } from 'react-native-reanimated';
+import { useTranslation } from 'react-i18next';
+import * as Location from 'expo-location';
 
 import { API_URL } from '@/constants/config';
 import { Colors, Shadows } from '@/constants/theme';
@@ -24,6 +26,7 @@ interface Product {
     basePrice?: number;
     highestBid?: number;
     auctionEndTime?: string;
+    distance?: number;
 }
 
 const CATEGORY_ICONS: Record<string, any> = {
@@ -40,20 +43,36 @@ export default function BuyerHome() {
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('All');
+    const [location, setLocation] = useState<{ latitude: number, longitude: number } | null>(null);
     const router = useRouter();
-    const { logout } = useAuth();
+    const { logout, user } = useAuth();
+    const { t } = useTranslation();
 
     const categories = ['All', 'Vegetables', 'Fruits', 'Grains', 'Dairy', 'Others'];
 
     const fetchProducts = async () => {
         try {
             setLoading(true);
-            const res = await axios.get(`${API_URL}/products`, {
-                params: {
-                    category: selectedCategory,
-                    search: search
+            let currentLoc = location;
+            if (!currentLoc) {
+                const { status } = await Location.requestForegroundPermissionsAsync();
+                if (status === 'granted') {
+                    const pos = await Location.getCurrentPositionAsync({});
+                    currentLoc = { latitude: pos.coords.latitude, longitude: pos.coords.longitude };
+                    setLocation(currentLoc);
                 }
-            });
+            }
+
+            const params: any = {
+                category: selectedCategory,
+                search: search
+            };
+            if (currentLoc) {
+                params.buyerLat = currentLoc.latitude;
+                params.buyerLng = currentLoc.longitude;
+            }
+
+            const res = await axios.get(`${API_URL}/products`, { params });
             setProducts(res.data as Product[]);
         } catch (error) {
             console.error(error);
@@ -127,22 +146,29 @@ export default function BuyerHome() {
                             <Text style={styles.outOfStock}>Sold Out</Text>
                         )
                     )}
+                    {item.distance !== undefined && item.distance > 50 && (
+                        <View style={styles.radiusBadge}>
+                            <MaterialCommunityIcons name="map-marker-distance" size={12} color="#D32F2F" />
+                            <Text style={styles.outOfRadiusText}> Too far ({Math.round(item.distance)}km)</Text>
+                        </View>
+                    )}
                 </View>
             </View>
 
             <View style={styles.actionContainer}>
                 {item.isAuction ? (
                     <TouchableOpacity
-                        style={styles.bidBtn}
+                        style={[styles.bidBtn, (item.distance !== undefined && item.distance > 50) && styles.disabledBtn]}
                         onPress={() => router.push(`/product/${item._id}` as any)}
+                        disabled={item.distance !== undefined && item.distance > 50}
                     >
                         <MaterialCommunityIcons name="gavel" size={20} color="#fff" />
                     </TouchableOpacity>
                 ) : (
                     <TouchableOpacity
-                        style={[styles.addBtn, item.quantity === 0 && styles.disabledBtn]}
+                        style={[styles.addBtn, (item.quantity === 0 || (item.distance !== undefined && item.distance > 50)) && styles.disabledBtn]}
                         onPress={() => addToCart(item._id)}
-                        disabled={item.quantity === 0}
+                        disabled={item.quantity === 0 || (item.distance !== undefined && item.distance > 50)}
                     >
                         <Ionicons name="cart-outline" size={20} color="#fff" />
                     </TouchableOpacity>
@@ -161,7 +187,7 @@ export default function BuyerHome() {
             >
                 <View style={styles.headerTop}>
                     <View>
-                        <Text style={styles.welcomeText}>Fresh from Farms</Text>
+                        <Text style={styles.welcomeText}>{t('buyerHome.welcome')} {user?.name}</Text>
                         <Text style={styles.brandText}>KHETKART</Text>
                     </View>
                     <View style={styles.headerActions}>
@@ -175,7 +201,7 @@ export default function BuyerHome() {
                     <Ionicons name="search" size={20} color={Colors.light.tint} />
                     <TextInput
                         style={styles.input}
-                        placeholder="Search for fresh produce..."
+                        placeholder={t('common.searchPlaceholder')}
                         placeholderTextColor="#999"
                         value={search}
                         onChangeText={setSearch}
@@ -190,7 +216,7 @@ export default function BuyerHome() {
 
             <View style={styles.content}>
                 <View style={styles.sectionHeader}>
-                    <Text style={styles.sectionTitle}>Categories</Text>
+                    <Text style={styles.sectionTitle}>{t('buyerHome.categories')}</Text>
                 </View>
 
                 <View>
@@ -232,7 +258,7 @@ export default function BuyerHome() {
                 </View>
 
                 <View style={styles.marketHeader}>
-                    <Text style={styles.sectionTitle}>Marketplace</Text>
+                    <Text style={styles.sectionTitle}>{t('buyerHome.featured')}</Text>
                     <Text style={styles.itemCount}>{products.length} products found</Text>
                 </View>
 
@@ -250,7 +276,7 @@ export default function BuyerHome() {
                         ListEmptyComponent={
                             <View style={styles.emptyContainer}>
                                 <MaterialCommunityIcons name="leaf-off" size={64} color={Colors.light.border} />
-                                <Text style={styles.empty}>No products available in this category.</Text>
+                                <Text style={styles.empty}>{t('buyerHome.noProducts')}</Text>
                             </View>
                         }
                     />
@@ -515,5 +541,19 @@ const styles = StyleSheet.create({
         color: Colors.light.earthy,
         fontSize: 16,
         paddingHorizontal: 40,
+    },
+    radiusBadge: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#FFEBEE',
+        paddingHorizontal: 6,
+        paddingVertical: 2,
+        borderRadius: 4,
+        marginLeft: 8,
+    },
+    outOfRadiusText: {
+        fontSize: 9,
+        fontWeight: '700',
+        color: '#D32F2F',
     },
 });

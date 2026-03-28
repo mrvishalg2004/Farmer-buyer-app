@@ -1,0 +1,90 @@
+{
+    "common": {
+        "loading": "लोड हो रहा है...",
+        "searchPlaceholder": "उत्पाद खोजें...",
+        "save": "सहेजें",
+        "cancel": "रद्द करें",
+        "accept": "स्वीकार करें",
+        "sold": "बिक गया",
+        "highestBid": "उच्चतम बोली",
+        "currentBid": "वर्तमान बोली",
+        "success": "सफलता",
+        "error": "त्रुटि"
+    },
+    "tabs": {
+        "home": "होम",
+        "market": "बाज़ार",
+        "cart": "टोकरी",
+        "auctions": "नीलामी",
+        "agriWaste": "कृषि अपशिष्ट",
+        "orders": "ऑर्डर",
+        "sales": "बिक्री",
+        "profile": "प्रोफ़ाइल",
+        "dashboard": "डैशबोर्ड"
+    },
+    "farmerDashboard": {
+        "welcome": "वापसी पर स्वागत है,",
+        "overview": "अवलोकन",
+        "totalProducts": "कुल उत्पाद",
+        "activeAuctions": "सक्रिय नीलामी",
+        "quickActions": "त्वरित क्रियाएं",
+        "addProduce": "उत्पाद जोड़ें",
+        "myListings": "मेरी सूची",
+        "viewAll": "सभी देखें",
+        "rs": "₹",
+        "per": "/"
+    },
+    "buyerHome": {
+        "welcome": "नमस्ते",
+        "findFresh": "ताजा उपज खोजें",
+        "categories": "श्रेणियां",
+        "featured": "विशेष उत्पाद",
+        "noProducts": "कोई उत्पाद उपलब्ध नहीं है"
+    },
+    "agriWaste": {
+        "dashboardTitle": "कृषि अपशिष्ट",
+        "dashboardSubtitle": "अपशिष्ट सूची प्रबंधित करें",
+        "sustainableSourcing": "सतत सोर्सिंग",
+        "searchPlaceholder": "अपशिष्ट सामग्री खोजें...",
+        "active": "सक्रिय",
+        "complete": "पूर्ण",
+        "recentBids": "हाल की बोलियां",
+        "waitingBid": "पहली बोली की प्रतीक्षा में...",
+        "noListingsTitle": "कोई कृषि अपशिष्ट सूचीबद्ध नहीं",
+        "noListingsMessage": "नीलामी के माध्यम से कृषि अपशिष्ट बेचने के लिए सूची जोड़ें।",
+        "listingsFound": "{{count}} सूचियां मिलीं",
+        "noActiveAuctions": "वर्तमान में कोई कृषि अपशिष्ट नीलामी सक्रिय नहीं है।"
+    },
+    "addAgriWaste": {
+        "title": "कृषि अपशिष्ट की सूची बनाएं",
+        "subtitle": "अपनी अपशिष्ट सामग्री के लिए नीलामी शुरू करें",
+        "materialType": "सामग्री का प्रकार",
+        "typePlaceholder": "जैसे गेहूं का भूसा, चावल की भूसी",
+        "imageUrl": "छवि URL",
+        "startingBid": "शुरुआती बोली (₹)",
+        "quantity": "मात्रा (टन)",
+        "duration": "नीलामी की अवधि (दिन)",
+        "description": "विवरण",
+        "descPlaceholder": "अपशिष्ट सामग्री के बारे में विवरण प्रदान करें...",
+        "startAuction": "नीलामी शुरू करें"
+    },
+    "language": {
+        "title": "भाषा",
+        "select": "भाषा चुनें",
+        "english": "English",
+        "hindi": "हिंदी (Hindi)",
+        "marathi": "मराठी (Marathi)"
+    },
+    "profileSettings": {
+        "title": "प्रोफ़ाइल और सेटिंग्स",
+        "name": "नाम",
+        "email": "ईमेल",
+        "security": "सुरक्षा",
+        "currentPassword": "वर्तमान पासवर्ड",
+        "newPassword": "नया पासवर्ड",
+        "updatePassword": "पासवर्ड अपडेट करें",
+        "passwordUpdated": "पासवर्ड सफलतापूर्वक अपडेट हो गया!",
+        "passwordsMismatch": "पासवर्ड अपडेट विफल रहा।",
+        "fillFields": "कृपया सभी पासवर्ड फ़ील्ड भरें।"
+    }
+}

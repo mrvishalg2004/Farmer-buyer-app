@@ -5,6 +5,7 @@ import { useEffect } from 'react';
 import * as Location from 'expo-location';
 import axios from 'axios';
 import { API_URL } from '@/constants/config';
+import '../i18n'; // Initialize i18next
 
 // Create a wrapper component to use the Auth Context
 function AppContent() {

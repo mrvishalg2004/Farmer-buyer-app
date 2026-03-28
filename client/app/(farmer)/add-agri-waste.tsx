@@ -5,6 +5,8 @@ import { useRouter } from 'expo-router';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeInUp, FadeInDown } from 'react-native-reanimated';
+import { useTranslation } from 'react-i18next';
+import * as Location from 'expo-location';
 
 import { API_URL } from '@/constants/config';
 import { Colors, Shadows } from '@/constants/theme';
@@ -40,6 +42,7 @@ export default function AddAgriWaste() {
     const [loading, setLoading] = useState(false);
 
     const router = useRouter();
+    const { t } = useTranslation();
 
     const handleSubmit = async () => {
         if (!name || !basePrice || !quantity) {
@@ -49,6 +52,16 @@ export default function AddAgriWaste() {
 
         setLoading(true);
         try {
+            let location = null;
+            const { status } = await Location.requestForegroundPermissionsAsync();
+            if (status === 'granted') {
+                const currentPos = await Location.getCurrentPositionAsync({});
+                location = {
+                    latitude: currentPos.coords.latitude,
+                    longitude: currentPos.coords.longitude
+                };
+            }
+
             await axios.post(`${API_URL}/products`, {
                 name,
                 category: 'Agri Waste', // Hardcoded category
@@ -60,7 +73,8 @@ export default function AddAgriWaste() {
                 isAuction: true, // Always an auction
                 isAgriWaste: true, // Mark as Agri Waste
                 basePrice: parseFloat(basePrice),
-                auctionEndTime: new Date(Date.now() + parseInt(auctionDuration) * 24 * 60 * 60 * 1000)
+                auctionEndTime: new Date(Date.now() + parseInt(auctionDuration) * 24 * 60 * 60 * 1000),
+                location
             });
             Alert.alert('Success', 'Agri Waste listed for auction successfully! 🌿');
             router.back();
@@ -83,8 +97,8 @@ export default function AddAgriWaste() {
                     <Ionicons name="arrow-back" size={24} color="#fff" />
                 </TouchableOpacity>
                 <View>
-                    <Text style={styles.headerTitle}>List Agri Waste</Text>
-                    <Text style={styles.headerSubtitle}>Start an auction for your waste materials</Text>
+                    <Text style={styles.headerTitle}>{t('addAgriWaste.title')}</Text>
+                    <Text style={styles.headerSubtitle}>{t('addAgriWaste.subtitle')}</Text>
                 </View>
                 <MaterialCommunityIcons name="leaf-maple" size={35} color="rgba(255,255,255,0.2)" />
             </LinearGradient>
@@ -96,15 +110,15 @@ export default function AddAgriWaste() {
             >
                 <Animated.View entering={FadeInUp.duration(600)}>
                     <InputField
-                        label="Type of Material"
+                        label={t('addAgriWaste.materialType')}
                         value={name}
                         onChangeText={setName}
-                        placeholder="e.g. Wheat Straw, Rice Husk"
+                        placeholder={t('addAgriWaste.typePlaceholder')}
                         icon="leaf"
                     />
 
                     <InputField
-                        label="Image URL"
+                        label={t('addAgriWaste.imageUrl')}
                         value={imageLink}
                         onChangeText={setImageLink}
                         placeholder="https://images.unsplash.com/..."
@@ -114,7 +128,7 @@ export default function AddAgriWaste() {
                     <View style={styles.row}>
                         <View style={{ flex: 1, marginRight: 10 }}>
                             <InputField
-                                label="Starting Bid (₹)"
+                                label={t('addAgriWaste.startingBid')}
                                 value={basePrice}
                                 onChangeText={setBasePrice}
                                 placeholder="0.00"
@@ -124,7 +138,7 @@ export default function AddAgriWaste() {
                         </View>
                         <View style={{ flex: 1 }}>
                             <InputField
-                                label="Quantity (Tons)"
+                                label={t('addAgriWaste.quantity')}
                                 value={quantity}
                                 onChangeText={setQuantity}
                                 placeholder="0"
@@ -136,7 +150,7 @@ export default function AddAgriWaste() {
 
                     <Animated.View entering={FadeInDown}>
                         <InputField
-                            label="Auction Duration (Days)"
+                            label={t('addAgriWaste.duration')}
                             value={auctionDuration}
                             onChangeText={setAuctionDuration}
                             placeholder="e.g. 7"
@@ -146,10 +160,10 @@ export default function AddAgriWaste() {
                     </Animated.View>
 
                     <InputField
-                        label="Description"
+                        label={t('addAgriWaste.description')}
                         value={description}
                         onChangeText={setDescription}
-                        placeholder="Provide details about the waste material..."
+                        placeholder={t('addAgriWaste.descPlaceholder')}
                         icon="text-subject"
                         multiline
                     />
@@ -170,7 +184,7 @@ export default function AddAgriWaste() {
                             ) : (
                                 <>
                                     <MaterialCommunityIcons name="gavel" size={22} color="#fff" />
-                                    <Text style={styles.submitText}>START AUCTION</Text>
+                                    <Text style={styles.submitText}>{t('addAgriWaste.startAuction')}</Text>
                                 </>
                             )}
                         </LinearGradient>

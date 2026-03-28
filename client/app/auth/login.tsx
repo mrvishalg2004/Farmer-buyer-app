@@ -26,6 +26,7 @@ const { width, height } = Dimensions.get('window');
 export default function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [role, setRole] = useState<'farmer' | 'buyer'>('buyer');
     const [loading, setLoading] = useState(false);
     const [rememberMe, setRememberMe] = useState(false);
@@ -126,9 +127,12 @@ export default function Login() {
                                     placeholder="Password"
                                     value={password}
                                     onChangeText={setPassword}
-                                    secureTextEntry
+                                    secureTextEntry={!showPassword}
                                     placeholderTextColor="#795548"
                                 />
+                                <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={{ padding: 10, marginRight: -5 }}>
+                                    <Ionicons name={showPassword ? "eye-off-outline" : "eye-outline"} size={22} color="#2E7D32" />
+                                </TouchableOpacity>
                             </View>
                         </View>
 

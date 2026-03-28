@@ -2,9 +2,11 @@ import { Tabs } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useAuth } from '../../context/AuthContext';
 import { Colors } from '@/constants/theme';
+import { useTranslation } from 'react-i18next';
 
 export default function BuyerLayout() {
     const { logout } = useAuth();
+    const { t } = useTranslation();
 
     return (
         <Tabs screenOptions={{
@@ -34,7 +36,7 @@ export default function BuyerLayout() {
             <Tabs.Screen
                 name="home"
                 options={{
-                    title: 'Market',
+                    title: t('tabs.market'),
                     tabBarIcon: ({ color, focused }) => (
                         <MaterialCommunityIcons
                             name={focused ? "storefront" : "storefront-outline"}
@@ -47,7 +49,7 @@ export default function BuyerLayout() {
             <Tabs.Screen
                 name="cart"
                 options={{
-                    title: 'Basket',
+                    title: t('tabs.cart'),
                     tabBarIcon: ({ color, focused }) => (
                         <MaterialCommunityIcons
                             name={focused ? "basket" : "basket-outline"}
@@ -60,7 +62,7 @@ export default function BuyerLayout() {
             <Tabs.Screen
                 name="agri-waste"
                 options={{
-                    title: 'Agri Waste',
+                    title: t('tabs.agriWaste'),
                     tabBarIcon: ({ color, focused }) => (
                         <MaterialCommunityIcons
                             name={focused ? "leaf-maple" : "leaf-maple"}
@@ -73,10 +75,23 @@ export default function BuyerLayout() {
             <Tabs.Screen
                 name="orders"
                 options={{
-                    title: 'Orders',
+                    title: t('tabs.orders'),
                     tabBarIcon: ({ color, focused }) => (
                         <MaterialCommunityIcons
                             name={focused ? "clipboard-text" : "clipboard-text-outline"}
+                            size={26}
+                            color={color}
+                        />
+                    ),
+                }}
+            />
+            <Tabs.Screen
+                name="profile"
+                options={{
+                    title: t('tabs.profile'),
+                    tabBarIcon: ({ color, focused }) => (
+                        <MaterialCommunityIcons
+                            name={focused ? "account" : "account-outline"}
                             size={26}
                             color={color}
                         />
