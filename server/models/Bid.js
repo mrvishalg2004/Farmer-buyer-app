@@ -15,6 +15,16 @@ const BidSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
+    requestedQuantity: {
+        type: Number,
+        required: true,
+        min: 1
+    },
+    status: {
+        type: String,
+        enum: ['PENDING', 'ACCEPTED', 'REJECTED'],
+        default: 'PENDING'
+    },
     createdAt: {
         type: Date,
         default: Date.now

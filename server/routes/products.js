@@ -3,6 +3,7 @@ const router = express.Router();
 const auth = require('../middleware/auth');
 const Product = require('../models/Product');
 const Order = require('../models/Order');
+const Bid = require('../models/Bid');
 
 // Helper function to calculate distance using Haversine formula
 function getDistance(lat1, lon1, lat2, lon2) {
@@ -234,20 +235,37 @@ router.post('/:id/bid', auth, async (req, res) => {
             return res.status(400).json({ message: 'Auction has ended' });
         }
 
-        const { amount } = req.body;
-        if (!amount || amount <= product.highestBid || amount <= product.basePrice) {
-            return res.status(400).json({ message: 'Bid must be higher than current highest bid and base price' });
+        const { amount, requestedQuantity } = req.body;
+        const parsedAmount = Number(amount);
+        const parsedQuantity = Number(requestedQuantity);
+
+        if (Number.isNaN(parsedAmount) || Number.isNaN(parsedQuantity) || parsedAmount <= 0 || parsedQuantity <= 0) {
+            return res.status(400).json({ message: 'Please provide valid amount and requested quantity' });
+        }
+
+        if (parsedQuantity > product.quantity) {
+            return res.status(400).json({ message: `Requested quantity exceeds available quantity (${product.quantity})` });
         }
 
         const newBid = {
             user: req.user.id,
-            amount,
+            amount: parsedAmount,
+            quantity: parsedQuantity,
             time: Date.now()
         };
 
         product.bids.push(newBid);
-        product.highestBid = amount;
-        product.highestBidderId = req.user.id; // Track the highest bidder
+        if (parsedAmount > (product.highestBid || 0)) {
+            product.highestBid = parsedAmount;
+            product.highestBidderId = req.user.id;
+        }
+
+        await Bid.create({
+            productId: product._id,
+            buyerId: req.user.id,
+            bidAmount: parsedAmount,
+            requestedQuantity: parsedQuantity
+        });
 
         await product.save();
         res.json(product);
@@ -277,15 +295,18 @@ router.post('/:id/accept-bid', auth, async (req, res) => {
         }
 
         // Create Order
+        const acceptedQuantity = bid.quantity || product.quantity;
+        const totalAmount = bid.amount * acceptedQuantity;
+
         const newOrder = new Order({
             user: bid.user,
             items: [{
                 product: product._id,
                 name: product.name,
                 price: bid.amount,
-                quantity: product.quantity // Assuming selling all quantity in auction
+                quantity: acceptedQuantity
             }],
-            totalAmount: bid.amount, // Total amount is the bid amount
+            totalAmount,
             paymentId: 'AUCTION_' + Date.now(), // Placeholder
             status: 'pending'
         });

@@ -61,7 +61,7 @@
         "materialType": "Type of Material",
         "typePlaceholder": "e.g. Wheat Straw, Rice Husk",
         "imageUrl": "Image URL",
-        "startingBid": "Starting Bid (₹)",
+        "startingBid": "Offered Price (₹)",
         "quantity": "Quantity (Tons)",
         "duration": "Auction Duration (Days)",
         "description": "Description",

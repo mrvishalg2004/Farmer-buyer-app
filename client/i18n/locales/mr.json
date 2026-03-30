@@ -61,7 +61,7 @@
         "materialType": "साहित्याचा प्रकार",
         "typePlaceholder": "उदा. गव्हाचा भुसा, तांदळाचा भुसा",
         "imageUrl": "इमेज URL",
-        "startingBid": "सुरुवातीची बोली (₹)",
+        "startingBid": "प्रस्तावित किंमत (₹)",
         "quantity": "प्रमाण (टन)",
         "duration": "लिलावाचा कालावधी (दिवस)",
         "description": "वर्णन",

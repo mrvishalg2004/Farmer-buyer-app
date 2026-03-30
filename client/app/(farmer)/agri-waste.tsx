@@ -17,6 +17,8 @@ interface Bid {
     _id: string;
     buyerId: { _id: string, name: string, email: string } | string;
     bidAmount: number;
+    requestedQuantity: number;
+    status?: 'PENDING' | 'ACCEPTED' | 'REJECTED';
     createdAt: string;
 }
 
@@ -68,10 +70,10 @@ export default function FarmerAgriWaste() {
         }, [])
     );
 
-    const handleAcceptBid = async (productId: string, bidId: string, amount: number) => {
+    const handleAcceptBid = async (productId: string, bidId: string, amount: number, requestedQuantity: number) => {
         Alert.alert(
             "Accept Bid",
-            `Are you sure you want to sell this for ₹${amount}? This will finalize the auction and create an order.`,
+            `Accept offer for ${requestedQuantity} units at ₹${amount}/unit?`,
             [
                 { text: "Cancel", style: "cancel" },
                 {
@@ -111,11 +113,14 @@ export default function FarmerAgriWaste() {
             </View>
 
             <View style={styles.bidAction}>
-                <Text style={styles.bidAmount}>₹{bid.bidAmount}</Text>
-                {!isSold && (
+                <Text style={styles.bidAmount}>₹{bid.bidAmount}/unit</Text>
+                <Text style={styles.bidMeta}>Qty: {bid.requestedQuantity || 1}</Text>
+                {bid.status === 'ACCEPTED' ? (
+                    <Text style={styles.acceptedTag}>ACCEPTED</Text>
+                ) : !isSold && (
                     <TouchableOpacity
                         style={styles.acceptBtn}
-                        onPress={() => handleAcceptBid(productId, bid._id, bid.bidAmount)}
+                        onPress={() => handleAcceptBid(productId, bid._id, bid.bidAmount, bid.requestedQuantity || 1)}
                     >
                         <Text style={styles.acceptText}>ACCEPT</Text>
                     </TouchableOpacity>
@@ -160,7 +165,7 @@ export default function FarmerAgriWaste() {
                     <View style={styles.divider} />
                     {item.bids && item.bids.length > 0 ? (
                         item.bids
-                            .sort((a, b) => b.bidAmount - a.bidAmount)
+                            .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
                             .map((bid, idx) => renderBid(bid, item._id, isSold, idx))
                     ) : (
                         <View style={styles.noBidsContainer}>
@@ -431,7 +436,17 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: '800',
         color: Colors.light.tint,
+    },
+    bidMeta: {
+        fontSize: 11,
+        fontWeight: '600',
+        color: Colors.light.secondaryText,
         marginBottom: 4,
+    },
+    acceptedTag: {
+        fontSize: 10,
+        fontWeight: '900',
+        color: Colors.light.tint,
     },
     acceptBtn: {
         backgroundColor: Colors.light.tint,

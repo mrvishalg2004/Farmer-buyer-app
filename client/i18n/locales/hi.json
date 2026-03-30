@@ -61,7 +61,7 @@
         "materialType": "सामग्री का प्रकार",
         "typePlaceholder": "जैसे गेहूं का भूसा, चावल की भूसी",
         "imageUrl": "छवि URL",
-        "startingBid": "शुरुआती बोली (₹)",
+        "startingBid": "प्रस्तावित कीमत (₹)",
         "quantity": "मात्रा (टन)",
         "duration": "नीलामी की अवधि (दिन)",
         "description": "विवरण",

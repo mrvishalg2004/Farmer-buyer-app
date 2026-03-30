@@ -36,6 +36,7 @@ export default function ProductDetails() {
     const [product, setProduct] = useState<Product | null>(null);
     const [loading, setLoading] = useState(true);
     const [bidAmount, setBidAmount] = useState('');
+    const [bidQuantity, setBidQuantity] = useState('1');
     const [placingBid, setPlacingBid] = useState(false);
     const { user } = useAuth();
 
@@ -105,16 +106,22 @@ export default function ProductDetails() {
     };
 
     const handlePlaceBid = async () => {
-        if (!bidAmount) return;
+        if (!bidAmount || !bidQuantity) return;
 
         const amount = parseFloat(bidAmount);
+        const quantity = parseInt(bidQuantity, 10);
         if (isNaN(amount)) {
             Alert.alert('Error', 'Invalid amount');
             return;
         }
 
-        if (product && amount <= (product.highestBid || product.basePrice || 0)) {
-            Alert.alert('Error', 'Bid must be higher than current price');
+        if (isNaN(quantity) || quantity <= 0) {
+            Alert.alert('Error', 'Enter a valid quantity');
+            return;
+        }
+
+        if (product && quantity > product.quantity) {
+            Alert.alert('Error', `Requested quantity cannot exceed ${product.quantity}`);
             return;
         }
 
@@ -122,10 +129,12 @@ export default function ProductDetails() {
         try {
             await axios.post(`${API_URL}/bids/place`, {
                 productId: id,
-                bidAmount: amount
+                bidAmount: amount,
+                requestedQuantity: quantity
             });
-            Alert.alert('Success', 'Bid placed successfully!');
+            Alert.alert('Success', 'Offer sent successfully!');
             setBidAmount('');
+            setBidQuantity('1');
             fetchProduct(); // Refresh
         } catch (error: any) {
             Alert.alert('Error', error.response?.data?.message || 'Could not place bid');
@@ -173,15 +182,23 @@ export default function ProductDetails() {
 
                 {product.isAuction && (
                     <View style={styles.bidSection}>
-                        <Text style={styles.sectionTitle}>Place a Bid</Text>
+                        <Text style={styles.sectionTitle}>Send Your Offer</Text>
 
                         {auctionActive ? (
                             <>
+                                <Text style={styles.offerHint}>Available quantity: {product.quantity} {product.unit}</Text>
                                 <TextInput
                                     style={styles.input}
                                     value={bidAmount}
                                     onChangeText={setBidAmount}
-                                    placeholder={`Enter amount > ₹${currentPrice}`}
+                                    placeholder="Enter offered price (₹/unit)"
+                                    keyboardType="numeric"
+                                />
+                                <TextInput
+                                    style={styles.input}
+                                    value={bidQuantity}
+                                    onChangeText={setBidQuantity}
+                                    placeholder="Enter required quantity"
                                     keyboardType="numeric"
                                 />
                                 <TouchableOpacity
@@ -192,7 +209,7 @@ export default function ProductDetails() {
                                     {placingBid ? (
                                         <ActivityIndicator color="#fff" />
                                     ) : (
-                                        <Text style={styles.bidBtnText}>Place Bid</Text>
+                                        <Text style={styles.bidBtnText}>Send Offer</Text>
                                     )}
                                 </TouchableOpacity>
                             </>
@@ -267,6 +284,11 @@ const styles = StyleSheet.create({
         color: '#444',
         lineHeight: 24,
         marginBottom: 20,
+    },
+    offerHint: {
+        marginBottom: 10,
+        color: '#2E7D32',
+        fontWeight: '600',
     },
     bidSection: {
         marginTop: 20,
