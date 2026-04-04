@@ -113,7 +113,11 @@ router.post('/:id/accept', auth, async (req, res) => {
             return res.status(400).json({ message: 'This offer has already been processed' });
         }
 
-        const acceptedQuantity = bid.requestedQuantity || product.quantity;
+        const acceptedQuantity = Number(bid.requestedQuantity || product.quantity);
+        if (Number.isNaN(acceptedQuantity) || acceptedQuantity <= 0) {
+            return res.status(400).json({ message: 'Accepted quantity must be a valid number greater than 0' });
+        }
+
         if (acceptedQuantity > product.quantity) {
             return res.status(400).json({
                 message: `Insufficient quantity. Available quantity is ${product.quantity}`
@@ -138,35 +142,70 @@ router.post('/:id/accept', auth, async (req, res) => {
 
         await newOrder.save();
 
-        // Update product inventory and auction state.
-        product.quantity = Math.max(0, product.quantity - acceptedQuantity);
-
-        if (product.quantity === 0) {
-            product.auctionStatus = 'SOLD';
-            product.highestBidderId = bid.buyerId;
-            product.highestBid = bid.bidAmount;
-        } else {
-            const topPendingBid = await Bid.findOne({
-                productId: product._id,
-                status: 'PENDING'
-            }).sort({ bidAmount: -1 });
-
-            if (topPendingBid) {
-                product.highestBid = topPendingBid.bidAmount;
-                product.highestBidderId = topPendingBid.buyerId;
-            } else {
-                product.highestBid = 0;
-                product.highestBidderId = undefined;
-            }
-            product.auctionStatus = 'OPEN';
-        }
-
+        // Mark current bid accepted first so it is not treated as a pending offer later.
         bid.status = 'ACCEPTED';
         await bid.save();
 
+        // Update product inventory and auction state.
+        const remainingQuantity = Math.max(0, Number(product.quantity) - acceptedQuantity);
+        product.quantity = remainingQuantity;
+        let continuedAuction = false;
+
+        if (remainingQuantity === 0) {
+            product.auctionStatus = 'SOLD';
+            product.highestBidderId = bid.buyerId;
+            product.highestBid = bid.bidAmount;
+
+            await Bid.updateMany(
+                {
+                    productId: product._id,
+                    _id: { $ne: bid._id },
+                    status: 'PENDING'
+                },
+                {
+                    $set: { status: 'REJECTED' }
+                }
+            );
+        } else {
+            continuedAuction = true;
+
+            // Start a fresh bidding round for remaining stock.
+            await Bid.updateMany(
+                {
+                    productId: product._id,
+                    _id: { $ne: bid._id },
+                    status: 'PENDING'
+                },
+                {
+                    $set: { status: 'REJECTED' }
+                }
+            );
+
+            product.bids = [];
+            product.highestBid = 0;
+            product.highestBidderId = undefined;
+            product.auctionStatus = 'OPEN';
+
+            // If the previous auction window already ended, give farmers a fresh 24h window.
+            if (!product.auctionEndTime || new Date(product.auctionEndTime) <= new Date()) {
+                const now = new Date();
+                product.auctionStartTime = now;
+                product.auctionEndTime = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+            }
+        }
+
         await product.save();
 
-        res.json({ message: 'Bid accepted, order created', order: newOrder });
+        res.json({
+            message: continuedAuction
+                ? `Bid accepted, order created. Auction continued with remaining quantity (${remainingQuantity} ${product.unit}).`
+                : 'Bid accepted, order created',
+            order: newOrder,
+            remainingQuantity,
+            continuedAuction,
+            auctionStatus: product.auctionStatus,
+            productId: product._id
+        });
 
     } catch (err) {
         console.error(err.message);

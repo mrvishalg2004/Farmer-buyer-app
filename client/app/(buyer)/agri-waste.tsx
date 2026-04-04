@@ -22,6 +22,7 @@ interface Product {
     quantity: number;
     image?: string;
     isAuction?: boolean;
+    auctionStatus?: 'OPEN' | 'CLOSED' | 'SOLD';
     basePrice?: number;
     highestBid?: number;
     auctionEndTime?: string;
@@ -82,11 +83,16 @@ export default function BuyerAgriWaste() {
         }, [])
     );
 
-    const renderItem = ({ item, index }: { item: Product; index: number }) => (
-        <Animated.View
-            entering={FadeInDown.delay(index * 100).duration(500)}
-            style={[styles.card, Shadows.light]}
-        >
+    const renderItem = ({ item, index }: { item: Product; index: number }) => {
+        const auctionOpen = Boolean(item.isAuction && item.auctionStatus === 'OPEN' && item.quantity > 0);
+        const isTooFar = item.distance !== undefined && item.distance > 50;
+        const disableAuctionBid = !auctionOpen || isTooFar;
+
+        return (
+            <Animated.View
+                entering={FadeInDown.delay(index * 100).duration(500)}
+                style={[styles.card, Shadows.light]}
+            >
             <View style={styles.imageContainer}>
                 <Image
                     source={{ uri: item.image || 'https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=200&h=200&auto=format&fit=crop' }}
@@ -106,10 +112,14 @@ export default function BuyerAgriWaste() {
                 </View>
 
                 <View style={styles.cardFooter}>
-                    <View style={styles.auctionBadge}>
-                        <MaterialCommunityIcons name="gavel" size={14} color={Colors.light.accent} />
-                        <Text style={styles.auctionText}>Current Bid</Text>
-                    </View>
+                    {auctionOpen ? (
+                        <View style={styles.auctionBadge}>
+                            <MaterialCommunityIcons name="gavel" size={14} color={Colors.light.accent} />
+                            <Text style={styles.auctionText}>Current Bid - Qty: {item.quantity}</Text>
+                        </View>
+                    ) : (
+                        <Text style={styles.closedText}>Auction Closed</Text>
+                    )}
                     {item.distance !== undefined && item.distance > 50 && (
                         <View style={styles.radiusBadge}>
                             <MaterialCommunityIcons name="map-marker-distance" size={12} color="#D32F2F" />
@@ -121,15 +131,16 @@ export default function BuyerAgriWaste() {
 
             <View style={styles.actionContainer}>
                 <TouchableOpacity
-                    style={[styles.bidBtn, (item.distance !== undefined && item.distance > 50) && styles.disabledBtn]}
+                    style={[styles.bidBtn, disableAuctionBid && styles.disabledBtn]}
                     onPress={() => router.push(`/product/${item._id}` as any)}
-                    disabled={item.distance !== undefined && item.distance > 50}
+                    disabled={disableAuctionBid}
                 >
                     <MaterialCommunityIcons name="gavel" size={20} color="#fff" />
                 </TouchableOpacity>
             </View>
-        </Animated.View>
-    );
+            </Animated.View>
+        );
+    };
 
     return (
         <View style={styles.container}>
@@ -353,6 +364,11 @@ const styles = StyleSheet.create({
         fontWeight: '700',
         color: Colors.light.accent,
         marginLeft: 4,
+    },
+    closedText: {
+        fontSize: 12,
+        fontWeight: '700',
+        color: '#D32F2F',
     },
     actionContainer: {
         marginLeft: 10,

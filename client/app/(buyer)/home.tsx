@@ -23,6 +23,7 @@ interface Product {
     quantity: number;
     image?: string;
     isAuction?: boolean;
+    auctionStatus?: 'OPEN' | 'CLOSED' | 'SOLD';
     basePrice?: number;
     highestBid?: number;
     auctionEndTime?: string;
@@ -104,11 +105,16 @@ export default function BuyerHome() {
         }
     };
 
-    const renderItem = ({ item, index }: { item: Product; index: number }) => (
-        <Animated.View
-            entering={FadeInDown.delay(index * 100).duration(500)}
-            style={[styles.card, Shadows.light]}
-        >
+    const renderItem = ({ item, index }: { item: Product; index: number }) => {
+        const auctionOpen = Boolean(item.isAuction && item.auctionStatus === 'OPEN' && item.quantity > 0);
+        const isTooFar = item.distance !== undefined && item.distance > 50;
+        const disableAuctionBid = !auctionOpen || isTooFar;
+
+        return (
+            <Animated.View
+                entering={FadeInDown.delay(index * 100).duration(500)}
+                style={[styles.card, Shadows.light]}
+            >
             <View style={styles.imageContainer}>
                 <Image
                     source={{ uri: item.image || 'https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=200&h=200&auto=format&fit=crop' }}
@@ -135,10 +141,14 @@ export default function BuyerHome() {
 
                 <View style={styles.cardFooter}>
                     {item.isAuction ? (
-                        <View style={styles.auctionBadge}>
-                            <MaterialCommunityIcons name="gavel" size={14} color={Colors.light.accent} />
-                            <Text style={styles.auctionText}>Auction</Text>
-                        </View>
+                        auctionOpen ? (
+                            <View style={styles.auctionBadge}>
+                                <MaterialCommunityIcons name="gavel" size={14} color={Colors.light.accent} />
+                                <Text style={styles.auctionText}>Auction - Qty: {item.quantity}</Text>
+                            </View>
+                        ) : (
+                            <Text style={styles.outOfStock}>Auction Closed</Text>
+                        )
                     ) : (
                         item.quantity > 0 ? (
                             <Text style={styles.stock}>In Stock: {item.quantity}</Text>
@@ -158,9 +168,9 @@ export default function BuyerHome() {
             <View style={styles.actionContainer}>
                 {item.isAuction ? (
                     <TouchableOpacity
-                        style={[styles.bidBtn, (item.distance !== undefined && item.distance > 50) && styles.disabledBtn]}
+                        style={[styles.bidBtn, disableAuctionBid && styles.disabledBtn]}
                         onPress={() => router.push(`/product/${item._id}` as any)}
-                        disabled={item.distance !== undefined && item.distance > 50}
+                        disabled={disableAuctionBid}
                     >
                         <MaterialCommunityIcons name="gavel" size={20} color="#fff" />
                     </TouchableOpacity>
@@ -174,8 +184,9 @@ export default function BuyerHome() {
                     </TouchableOpacity>
                 )}
             </View>
-        </Animated.View>
-    );
+            </Animated.View>
+        );
+    };
 
     return (
         <View style={styles.container}>

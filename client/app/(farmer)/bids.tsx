@@ -24,6 +24,7 @@ interface Bid {
 interface Product {
     _id: string;
     name: string;
+    quantity: number;
     image?: string;
     isAuction?: boolean;
     basePrice: number;
@@ -68,7 +69,7 @@ export default function FarmerBids() {
         }, [])
     );
 
-    const handleAcceptBid = async (productId: string, bidId: string, amount: number, requestedQuantity: number) => {
+    const handleAcceptBid = async (bidId: string, amount: number, requestedQuantity: number) => {
         Alert.alert(
             "Accept Bid",
             `Accept offer for ${requestedQuantity} units at ₹${amount}/unit?`,
@@ -78,8 +79,19 @@ export default function FarmerBids() {
                     text: "Accept",
                     onPress: async () => {
                         try {
-                            await axios.post(`${API_URL}/bids/${bidId}/accept`, {});
-                            Alert.alert("Success", "Bid accepted! Order has been created. 🎉");
+                            const res = await axios.post(`${API_URL}/bids/${bidId}/accept`, {});
+                            const continuedAuction = Boolean(res.data?.continuedAuction);
+                            const remainingQuantity = Number(res.data?.remainingQuantity ?? 0);
+
+                            if (continuedAuction) {
+                                Alert.alert(
+                                    "Success",
+                                    `Bid accepted! Order has been created. Remaining quantity (${remainingQuantity}) is now open for fresh bids.`
+                                );
+                            } else {
+                                Alert.alert("Success", "Bid accepted! Order has been created and this listing is now completed.");
+                            }
+
                             fetchBids();
                         } catch (error: any) {
                             Alert.alert("Error", error.response?.data?.message || "Failed to accept bid");
@@ -90,7 +102,7 @@ export default function FarmerBids() {
         );
     };
 
-    const renderBid = (bid: Bid, productId: string, isSold: boolean, index: number) => (
+    const renderBid = (bid: Bid, isSold: boolean, index: number) => (
         <Animated.View
             key={bid._id}
             entering={FadeInDown.delay(index * 50)}
@@ -115,10 +127,12 @@ export default function FarmerBids() {
                 <Text style={styles.bidMeta}>Qty: {bid.requestedQuantity || 1}</Text>
                 {bid.status === 'ACCEPTED' ? (
                     <Text style={styles.acceptedTag}>ACCEPTED</Text>
+                ) : bid.status === 'REJECTED' ? (
+                    <Text style={styles.rejectedTag}>REJECTED</Text>
                 ) : !isSold && (
                     <TouchableOpacity
                         style={styles.acceptBtn}
-                        onPress={() => handleAcceptBid(productId, bid._id, bid.bidAmount, bid.requestedQuantity || 1)}
+                        onPress={() => handleAcceptBid(bid._id, bid.bidAmount, bid.requestedQuantity || 1)}
                     >
                         <Text style={styles.acceptText}>ACCEPT</Text>
                     </TouchableOpacity>
@@ -142,6 +156,7 @@ export default function FarmerBids() {
                     />
                     <View style={styles.productInfo}>
                         <Text style={styles.productName}>{item.name}</Text>
+                        <Text style={styles.remainingText}>Remaining: {item.quantity}</Text>
                         <View style={styles.bidStatus}>
                             {isSold ? (
                                 <View style={styles.soldBadge}>
@@ -164,7 +179,7 @@ export default function FarmerBids() {
                     {item.bids && item.bids.length > 0 ? (
                         item.bids
                             .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-                            .map((bid, idx) => renderBid(bid, item._id, isSold, idx))
+                            .map((bid, idx) => renderBid(bid, isSold, idx))
                     ) : (
                         <View style={styles.noBidsContainer}>
                             <MaterialCommunityIcons name="gavel" size={24} color={Colors.light.border} />
@@ -434,6 +449,17 @@ const styles = StyleSheet.create({
         fontSize: 10,
         fontWeight: '900',
         color: Colors.light.tint,
+    },
+    rejectedTag: {
+        fontSize: 10,
+        fontWeight: '900',
+        color: '#D32F2F',
+    },
+    remainingText: {
+        marginTop: 2,
+        fontSize: 12,
+        fontWeight: '600',
+        color: Colors.light.secondaryText,
     },
     acceptBtn: {
         backgroundColor: Colors.light.tint,
